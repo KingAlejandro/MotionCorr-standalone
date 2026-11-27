@@ -1,0 +1,24 @@
+fixture                      route                    readok coefNEq  max_coef_abs    max_vec_px    rms_vec_px | late24 max_vec
+F00_zero                     real-write-read            yes       0  0.000000e+00  0.000000e+00  0.000000e+00 | 0.000000e+00
+F00_zero                     fullprecision-test-only    yes       0  0.000000e+00  0.000000e+00  0.000000e+00 | 0.000000e+00
+F01_exact                    real-write-read            yes       0  0.000000e+00  0.000000e+00  0.000000e+00 | 0.000000e+00
+F01_exact                    fullprecision-test-only    yes       0  0.000000e+00  0.000000e+00  0.000000e+00 | 0.000000e+00
+F02_ordinary                 real-write-read            yes      36  4.815080e-06  1.348363e-02  3.052703e-03 | 2.954396e-03
+F02_ordinary                 fullprecision-test-only    yes       0  0.000000e+00  0.000000e+00  0.000000e+00 | 0.000000e+00
+F03_neg_z3_const             real-write-read            yes       1  2.712870e-06  3.191665e-01  1.236967e-01 | 3.300749e-02
+F03_neg_z3_const             fullprecision-test-only    yes       0  0.000000e+00  0.000000e+00  0.000000e+00 | 0.000000e+00
+F04_neg_z3_xy                real-write-read            yes       1  2.712870e-06  7.979161e-02  1.518417e-02 | 8.251873e-03
+F04_neg_z3_xy                fullprecision-test-only    yes       0  0.000000e+00  0.000000e+00  0.000000e+00 | 0.000000e+00
+F05_pos_near_switches        real-write-read            yes      22  5.000000e-07  4.623382e-02  1.122290e-02 | 4.793206e-03
+F05_pos_near_switches        fullprecision-test-only    yes       0  0.000000e+00  0.000000e+00  0.000000e+00 | 0.000000e+00
+F06_neg_near_switches        real-write-read            yes      22  4.567890e-06  1.285848e-01  2.628055e-02 | 1.346573e-02
+F06_neg_near_switches        fullprecision-test-only    yes       0  0.000000e+00  0.000000e+00  0.000000e+00 | 0.000000e+00
+F07_late_frame_z3_stress     real-write-read            yes      36  4.567890e-06  3.444673e-01  1.341305e-01 | 3.691167e-02
+F07_late_frame_z3_stress     fullprecision-test-only    yes       0  0.000000e+00  0.000000e+00  0.000000e+00 | 0.000000e+00
+F08_width_edges              real-write-read            yes       5  5.000000e-01  3.302344e+02  6.160483e+01 | 3.660400e+01
+F08_width_edges              fullprecision-test-only    yes       0  0.000000e+00  0.000000e+00  0.000000e+00 | 0.000000e+00
+F09_tiny_and_signed_zero     real-write-read            yes       3  1.000000e-30  3.460632e-27  1.215963e-27 | 9.512962e-29
+F09_tiny_and_signed_zero     fullprecision-test-only  READ FAILED: ERROR: 
+Invalid floating-point STAR value: 4.9406564584124654e-324
+F10_neg_z3_all_corners       real-write-read            yes       4  2.712870e-06  5.642119e-01  1.759865e-01 | 5.834955e-02
+F10_neg_z3_all_corners       fullprecision-test-only    yes       0  0.000000e+00  0.000000e+00  0.000000e+00 | 0.000000e+00

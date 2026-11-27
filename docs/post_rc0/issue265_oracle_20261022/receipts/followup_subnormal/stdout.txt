@@ -1,0 +1,9 @@
+fixture                      route                    readok coefNEq  max_coef_abs    max_vec_px    rms_vec_px | late24 max_vec
+G00_smallest_normal_and_1e-300 real-write-read            yes       3  2.225074e-30  1.124156e-25  4.326422e-26 | 1.104111e-26
+G00_smallest_normal_and_1e-300 fullprecision-test-only    yes       0  0.000000e+00  0.000000e+00  0.000000e+00 | 0.000000e+00
+G01_subnormal_1e-310         real-write-read            yes       1  1.000000e-31  4.900000e-30  2.843413e-30 | 2.300000e-30
+G01_subnormal_1e-310         fullprecision-test-only  READ FAILED: ERROR: 
+Invalid floating-point STAR value: 9.9999999999999694e-311
+G02_subnormal_min            real-write-read            yes       1  4.940656e-32  2.420921e-30  1.404833e-30 | 1.136351e-30
+G02_subnormal_min            fullprecision-test-only  READ FAILED: ERROR: 
+Invalid floating-point STAR value: 4.9406564584124654e-324

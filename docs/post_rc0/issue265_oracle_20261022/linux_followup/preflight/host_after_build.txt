@@ -1,0 +1,20 @@
+2026-10-22T22:00:05Z
+root             111  16  0.0 [cpuhp/16]
+root             112  16  0.0 [idle_inject/16]
+root             113  16  0.0 [migration/16]
+root             114  16  0.0 [ksoftirqd/16]
+root             116  16  0.0 [kworker/16:0H-events_highpri]
+root             936  16  0.0 [irq/39-aerdrv]
+root            1163  16  0.0 [kworker/u448:0]
+root            1413  16  0.0 [kworker/16:1H-kblockd]
+alex          362178  16  0.0 -bash
+dvi41342      992183  16  0.0 /home/dvi41342/.vscode-server/code-a5b500951314efd502d07465bd138dfbd714a960 --cli-data-dir /home/dvi41342/.vscode-server/cli agent
+root         2862941  16  0.0 [kworker/u265:1-events_unbound]
+root         2907898  16  0.0 [kworker/u265:0-events_unbound]
+root         2955745  16  0.0 [kworker/16:0-events]
+root         3056053  16  0.0 [kworker/u265:2-flush-8:16]
+root         3060828  16  0.0 [kworker/16:2-cgroup_free]
+alex         3296026  16  0.0 bash build_linux.sh /mnt/clathrin/alex-motioncorr-star265-linux-20261022-d9d2c4ab mc265-main-blobs.txt /mnt/clathrin/alex-motionco
+alex         3303429  16 1000 ps -eo user:12,pid,psr,pcpu,args
+alex         3303430  16  0.0 awk $3==16
+alex         3303431  16  0.0 cut -c1-160

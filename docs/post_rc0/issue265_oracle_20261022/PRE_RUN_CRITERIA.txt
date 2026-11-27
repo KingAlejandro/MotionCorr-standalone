@@ -1,0 +1,29 @@
+MotionCorr #265 native round-trip oracle: criteria declared BEFORE the first run.
+SPDX-License-Identifier: GPL-2.0-or-later
+
+These describe how the oracle's own controls are judged. None is a tolerance on
+the production serializer: the serializer's measured discrepancy is reported as
+measured and is not compared against any gate.
+
+K1 No-issue controls (F00_zero, F01_exact). Prediction from the formatter source
+   (%12.6f positive, %12.5f negative, scientific only below 0.001 or above 1e5):
+   every coefficient reads back bit-identical and every sampled shift error is
+   exactly 0. If this fails the failure is recorded as measured and is not
+   explained away.
+K2 Full-precision independent file (TEST-ONLY). For every fixture, the real
+   written STAR text is copied with only the coefficient token on each data line
+   replaced by the %.17g rendering of the pre-write double, then read by the real
+   ThirdOrderPolynomialModel::read. Prediction: every coefficient bit-identical
+   and every sampled shift error exactly 0, for every fixture. This shows the
+   oracle can detect and remove formatting error; it does not implement a fix.
+K3 Injected-error control. The K2 file of F02_ordinary has Y idx 17 changed by
+   +1e-6 (rendered %.17g). With d = read-back minus pre-write value of that
+   coefficient, the oracle's largest |dy| must be at the sample maximising
+   |d * z^3 * x * y| (frame 49), dx must be exactly 0, and the measured largest
+   |dy| must equal max over samples of |d * z^3 * x * y| to relative 1e-9
+   (rounding of a difference of two nearly equal doubles is ~1e-14 relative at
+   this magnitude).
+K4 Coefficient equality is bitwise (memcmp of the double). Errors are absolute,
+   in the coefficient's own units; relative error is reported where pre != 0.
+K5 Shift errors are post - pre per component and hypot(ex, ey), absolute
+   unbinned pixels, evaluated by the same compiled getShiftAt on both models.

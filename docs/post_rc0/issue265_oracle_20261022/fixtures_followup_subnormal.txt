@@ -1,0 +1,46 @@
+# MotionCorr #265 native round-trip oracle: constructed serializer probes.
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# FOLLOW-UP table, written AFTER observing iteration-1 output (F09 full-precision read failed on a subnormal).
+# Constructed serializer probes only; locates where the real reader stops accepting full-precision tokens.
+# no accuracy claim about any real movie; they probe the STAR serializer only.
+#
+# Coefficient layout (ThirdOrderPolynomialModel::getShiftAt), per dimension:
+#   idx 0,1,2   z, z^2, z^3        (x^0 y^0 term)
+#   idx 3,4,5   z, z^2, z^3  * x
+#   idx 6,7,8   z, z^2, z^3  * x^2
+#   idx 9,10,11 z, z^2, z^3  * y
+#   idx 12,13,14 z, z^2, z^3 * y^2
+#   idx 15,16,17 z, z^2, z^3 * x*y
+# z = 0-indexed frame, x = pixel_x/width - 0.5, y = pixel_y/height - 0.5.
+# Shifts are in unbinned absolute pixels.
+#
+# Sampling: every fixture is evaluated on every GEOMETRY, at every position
+# (fractions of (size-1), per axis) plus the explicit extra pixels, and at
+# every integer frame 0..FRAMES-1.
+GEOMETRY G1 3838 3710
+GEOMETRY G2 5760 4092
+FRACTIONS 0 0.25 0.5 0.75 1
+EXTRA_PIXEL 1000.5 2500.25
+FRAMES 50
+# Reporting ranges (inclusive, 0-indexed frames).
+RANGE early 0 5
+RANGE mid 6 17
+RANGE late24 18 23
+RANGE gap 24 33
+RANGE late40 34 39
+RANGE gap2 40 43
+RANGE late50 44 49
+RANGE all 0 49
+
+FIXTURE G00_smallest_normal_and_1e-300 | smallest normal double, 1e-300 and negative zero; full-precision tokens only differ from F09 by omitting the subnormal
+X 2.2250738585072014e-308 -2.2250738585072014e-308 1e-300 -0.0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Y 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+FIXTURE G01_subnormal_1e-310 | subnormal 1e-310 alone
+X 1e-310 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Y 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+FIXTURE G02_subnormal_min | smallest subnormal 4.9406564584124654e-324 alone
+X 4.9406564584124654e-324 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Y 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0

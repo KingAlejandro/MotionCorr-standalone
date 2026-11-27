@@ -248,6 +248,10 @@ if(BUILD_TESTING)
     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
     add_test(NAME PatchRetryState COMMAND patch_retry_state)
+    # #226 D2: retry lifetime arithmetic, checked without CUDA or a GPU.
+    add_executable(patch_retry_admission tests/test_patch_retry_admission.cpp)
+    target_include_directories(patch_retry_admission PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME PatchRetryAdmission COMMAND patch_retry_admission)
     add_executable(defect_parser tests/test_defect_parser.cpp)
     target_link_libraries(defect_parser PRIVATE motioncorr_core)
     # Pure C++ arithmetic regression (issue #97). Registered above the
@@ -796,6 +800,11 @@ if(BUILD_TESTING AND CUDA)
             "scratch.block = reinterpret_cast<char*>(d_Fframes);" "LINKER:--wrap=cudaMalloc")
         # Worker-lifetime device gain retention: the produced sum is the oracle,
         # so a wrongly reused or wrongly retired buffer changes pixels.
+        add_executable(cuda_local_admission tests/cuda_local_admission.cpp)
+        target_link_libraries(cuda_local_admission PRIVATE motioncorr_core)
+        target_link_options(cuda_local_admission PRIVATE "LINKER:--wrap=cudaMemGetInfo")
+        add_test(NAME CudaLocalAdmission COMMAND cuda_local_admission)
+        set_tests_properties(CudaLocalAdmission PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
         add_executable(cuda_device_gain_pool tests/cuda_device_gain_pool.cpp)
         target_link_libraries(cuda_device_gain_pool PRIVATE motioncorr_core)
         target_link_options(cuda_device_gain_pool PRIVATE

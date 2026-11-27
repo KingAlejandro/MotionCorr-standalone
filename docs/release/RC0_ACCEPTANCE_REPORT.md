@@ -249,6 +249,22 @@ Reference rows (earlier SHAs; context only, not RC0 results):
 
 Per-family GPU and CPU timing tables are in `docs/workload_corpus/{cpu,gpu}/`; do not copy them here without their provenance.
 
+## Post-RC0 #226 D2: patch workspace admission
+
+PR implementation head `bb34855434e0293ad559781697610d742765ebcd` (subsequent
+merge/evidence commits leave production sources/CMake unchanged; #247 changes
+only tests/docs). Re-entry class: CUDA/shared source (§9.4). Release full CTest
+passes CPU 74/74, CUDA 109/109 and CUDA+nvCOMP 112/112. Native same-GPU QM replay
+reproduces six failures without the fix and passes all 15 constrained points
+with it; nine passing neighbours retain routes, and all completed products match
+unconstrained references (including three cross-revision references).
+The resident floors remain unchanged; the measured D2 gaps now complete through
+existing streaming paths, with updated host-RSS caveats in SUPPORT §8.
+Evidence: `docs/rc0/issue226/d2/README.md`. Full QF, S1, performance, macOS,
+multi-GPU, physical smaller cards, host OOM and poisoned-device controls were not
+rerun; their rows retain earlier SHAs. No gate/tolerance or numerical change.
+D3 has separate evidence; no new tag or release acceptance is asserted.
+
 ## 7. Sign-off
 
 Maintainer review of this report, the scope decision and the tag are separate steps (`RELEASE_CHECKLIST.md` §10). Frozen source SHA F: `6d68e2d6`. Tag target T (named by the maintainer; F or a later docs-only evidence commit): pending. `git diff F T -- . ':!docs/rc0' ':!docs/release'` empty: pending. Maintainer sign-off: pending (QF on F is recorded in `docs/rc0/qf/run_6d68e2d6/`).

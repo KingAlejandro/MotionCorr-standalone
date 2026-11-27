@@ -3142,6 +3142,20 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #ifdef _CUDA_ENABLED
 	if (movie_session && !movie_session->releasePreprocessingBuffers())
 		REPORT_ERROR("CUDA preprocessing cleanup failed for " + fn_mic);
+	// Preserve the pre-existing gain/sum fallback before testing local-stage
+	// headroom: the neighbouring low-memory global routes must not change (#226 D2).
+	if (movie_session && patch_x > 2 && patch_y > 2) {
+		const int pw = (nx / patch_x) / 2 * 2;
+		const int ph = (ny / patch_y) / 2 * 2;
+		if (!movie_session->admitLocalAlignment(pw, ph, n_groups,
+		                                      bfactor / (prescaling * prescaling), ccf_downsample)) {
+			refuse_fallback_if_fatal(movie_session->getFailureState(), "local alignment admission");
+			if (!movie_session->downloadRealFrames(Iframes))
+				REPORT_ERROR("Failed to preserve corrected frames after local alignment admission decline");
+			host_frames_are_raw = false;
+			discard_preprocessing_session("local alignment admission");
+		}
+	}
 #endif
 
 //#define WRITE_FRAMES
@@ -3689,6 +3703,22 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					// failure here (or a failed first preparation) takes the
 					// download path below.
 					bool resident_retry_prep_done = false;
+					if (movie_session && device_prep_ok &&
+					    !movie_session->admitPatchRetry(patch_w, patch_h, n_groups,
+					        bfactor / (prescaling * prescaling), ccf_downsample)) {
+						refuse_fallback_if_fatal(movie_session->getFailureState(), "patch retry admission");
+						// Preserve both globally aligned representations: patch preparation
+						// reads the real frames; dose weighting later reads the spectra.
+						if (!movie_session->downloadRealFrames(Iframes) ||
+						    !movie_session->downloadFourierFrames(Fframes))
+							REPORT_ERROR("Failed to preserve aligned frames after patch retry admission decline");
+						host_frames_are_raw = false;
+						discard_preprocessing_session("patch retry admission");
+						cufftComplex *stale = d_patch_fcomplex_buffer;
+						d_patch_fcomplex_buffer = nullptr;
+						sz_cached_patch_fcomplex = 0;
+						if (stale) HANDLE_ERROR(cudaFree(stale));
+					}
 					if (movie_session && device_prep_ok) {
 						RCTIC(TIMING_PREP_PATCH);
 						resident_retry_prep_done = movie_session->downloadPatchSpectra(

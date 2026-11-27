@@ -1,0 +1,2934 @@
+{
+  "runs-d2-124a8708": [
+    {
+      "spec": "e10216-L-auto@7.5",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 20.57,
+      "free_vram_after_balloon_mib": 7677,
+      "max_rss_mib": 7848,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Movie FFT: batch=1 R2C work=67141632 C2R work=67141632 shared work=67141632 inverse tile=67141632 bytes",
+            "Staging this movie as native signed 16-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 1979711488 bytes for 59 x 4096 x 4096 samples, released before any float movie is materialized.",
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native int16 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 73030 of 81153 MiB; workspace 127 MiB + cuFFT work 10 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 602 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB"
+          ],
+          "only_in_candidate": [
+            "ERROR: Movie buffer allocation failed: out of memory",
+            "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Dose weighting and summing frames (CUDA)...",
+            "Peak VRAM: 288.08 MiB",
+            "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10216-L-auto@7.5/out/Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 59 --i movies.star --j 8 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10216-L-auto@7.5/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10216-L-auto@7.5/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10216": {
+          "movie": "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs",
+          "source": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc",
+          "bytes": 1979712512
+        }
+      },
+      "sampled": {
+        "n": 69,
+        "peak_gpu_used_mib": 78145,
+        "peak_motioncorr_above_baseline_mib": 4668,
+        "peak_compute_app_mib": 4662,
+        "min_free_mib": 3010
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10216-L-auto@8",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 21.81,
+      "free_vram_after_balloon_mib": 8189,
+      "max_rss_mib": 7875,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native int16 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 73030 of 81153 MiB; workspace 127 MiB + cuFFT work 10 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 602 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB"
+          ],
+          "only_in_candidate": [
+            "CUDA Error in /mnt/clathrin/alex-motioncorr-226/base/src/acc/cuda/cuda_movie_session.cu:893 : out of memory",
+            "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing.",
+            "Materialized native int16 frames as float for CPU fallback.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Dose weighting and summing frames (CUDA)...",
+            "Peak VRAM: 288.08 MiB",
+            "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10216-L-auto@8/out/Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 59 --i movies.star --j 8 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10216-L-auto@8/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10216-L-auto@8/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10216": {
+          "movie": "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs",
+          "source": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc",
+          "bytes": 1979712512
+        }
+      },
+      "sampled": {
+        "n": 78,
+        "peak_gpu_used_mib": 81145,
+        "peak_motioncorr_above_baseline_mib": 8180,
+        "peak_compute_app_mib": 8174,
+        "min_free_mib": 10
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": true,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10216-L-auto@8.5",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 6.27,
+      "free_vram_after_balloon_mib": 8701,
+      "max_rss_mib": 4095,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [
+        "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 59 --i movies.star --j 8 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10216-L-auto@8.5/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10216-L-auto@8.5/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10216": {
+          "movie": "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs",
+          "source": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc",
+          "bytes": 1979712512
+        }
+      },
+      "sampled": {
+        "n": 23,
+        "peak_gpu_used_mib": 81079,
+        "peak_motioncorr_above_baseline_mib": 8626,
+        "peak_compute_app_mib": 8620,
+        "min_free_mib": 76
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        0
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": true,
+      "stray_products": {
+        "FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10216-L-auto@8.75",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 3.47,
+      "free_vram_after_balloon_mib": 8957,
+      "max_rss_mib": 2082,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 73030 of 81153 MiB; workspace 127 MiB + cuFFT work 10 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 602 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB"
+          ],
+          "only_in_candidate": [
+            "Batched patch alignment: 25 patches, chunk size 0 (cap 4, 0 chunk(s)); free device memory 837 of 81153 MiB; workspace does not fit, using per-patch alignment.",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 59 --i movies.star --j 8 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10216-L-auto@8.75/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10216-L-auto@8.75/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10216": {
+          "movie": "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs",
+          "source": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc",
+          "bytes": 1979712512
+        }
+      },
+      "sampled": {
+        "n": 10,
+        "peak_gpu_used_mib": 80975,
+        "peak_motioncorr_above_baseline_mib": 8778,
+        "peak_compute_app_mib": 8808,
+        "min_free_mib": 180
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        0
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10216-L-auto@none",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 3.13,
+      "free_vram_after_balloon_mib": 81154,
+      "max_rss_mib": 2066,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "this is the unconstrained baseline"
+      },
+      "witness": [
+        "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 59 --i movies.star --j 8 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10216-L-auto@none/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10216-L-auto@none/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10216": {
+          "movie": "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs",
+          "source": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc",
+          "bytes": 1979712512
+        }
+      },
+      "sampled": {
+        "n": 11,
+        "peak_gpu_used_mib": 8877,
+        "peak_motioncorr_above_baseline_mib": 8876,
+        "peak_compute_app_mib": 8868,
+        "min_free_mib": 72277
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        4
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@36.5",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 164.41,
+      "free_vram_after_balloon_mib": 37373,
+      "max_rss_mib": 37267,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Movie FFT: batch=1 R2C work=377184192 C2R work=377184192 shared work=377184192 inverse tile=377184192 bytes",
+            "nvCOMP ingestion declined (bits per sample != 16); using the host reader.",
+            "Staging this movie as native unsigned 8-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 4713984000 bytes for 50 x 11520 x 8184 samples, released before any float movie is materialized.",
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint8 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43666 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2788 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB"
+          ],
+          "only_in_candidate": [
+            "ERROR: Movie FFT scratch allocation failed for batch=1 workspace=377184192 tile=377184192: out of memory",
+            "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10441-L-auto@36.5/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10441-L-auto@36.5/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 328,
+        "peak_gpu_used_mib": 80531,
+        "peak_motioncorr_above_baseline_mib": 36750,
+        "peak_compute_app_mib": 20574,
+        "min_free_mib": 624
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@37",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 119.15,
+      "free_vram_after_balloon_mib": 37885,
+      "max_rss_mib": 37267,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint8 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43666 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2788 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB"
+          ],
+          "only_in_candidate": [
+            "CUDA Error in /mnt/clathrin/alex-motioncorr-226/base/src/acc/cuda/cuda_movie_session.cu:793 : out of memory",
+            "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing.",
+            "Materialized native uint8 frames as float for CPU fallback.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10441-L-auto@37/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10441-L-auto@37/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 342,
+        "peak_gpu_used_mib": 80749,
+        "peak_motioncorr_above_baseline_mib": 37480,
+        "peak_compute_app_mib": 37474,
+        "min_free_mib": 406
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": true,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@37.5",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 109.37,
+      "free_vram_after_balloon_mib": 38397,
+      "max_rss_mib": 41762,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint8 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43666 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2788 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB"
+          ],
+          "only_in_candidate": [
+            "Local alignment admission declined: requires 2463998576 bytes of workspace, available 957546496 bytes; falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10441-L-auto@37.5/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10441-L-auto@37.5/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 400,
+        "peak_gpu_used_mib": 80687,
+        "peak_motioncorr_above_baseline_mib": 37930,
+        "peak_compute_app_mib": 37924,
+        "min_free_mib": 468
+      },
+      "local_admission": [
+        "Local alignment admission declined: requires 2463998576 bytes of workspace, available 957546496 bytes; falling back to streaming pipeline."
+      ],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@38",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 105.98,
+      "free_vram_after_balloon_mib": 38909,
+      "max_rss_mib": 41763,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint8 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43666 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2788 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB"
+          ],
+          "only_in_candidate": [
+            "Local alignment admission declined: requires 2463998576 bytes of workspace, available 1494417408 bytes; falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10441-L-auto@38/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10441-L-auto@38/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 367,
+        "peak_gpu_used_mib": 80175,
+        "peak_motioncorr_above_baseline_mib": 37930,
+        "peak_compute_app_mib": 37924,
+        "min_free_mib": 980
+      },
+      "local_admission": [
+        "Local alignment admission declined: requires 2463998576 bytes of workspace, available 1494417408 bytes; falling back to streaming pipeline."
+      ],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@38.5",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 104.44,
+      "free_vram_after_balloon_mib": 39421,
+      "max_rss_mib": 41761,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint8 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43666 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2788 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB"
+          ],
+          "only_in_candidate": [
+            "Local alignment admission declined: requires 2463998576 bytes of workspace, available 2031288320 bytes; falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10441-L-auto@38.5/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10441-L-auto@38.5/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 376,
+        "peak_gpu_used_mib": 79663,
+        "peak_motioncorr_above_baseline_mib": 37930,
+        "peak_compute_app_mib": 37924,
+        "min_free_mib": 1492
+      },
+      "local_admission": [
+        "Local alignment admission declined: requires 2463998576 bytes of workspace, available 2031288320 bytes; falling back to streaming pipeline."
+      ],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@39",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 26.99,
+      "free_vram_after_balloon_mib": 39933,
+      "max_rss_mib": 5164,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43666 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2788 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB"
+          ],
+          "only_in_candidate": [
+            "Batched patch alignment: 25 patches, chunk size 0 (cap 4, 0 chunk(s)); free device memory 2449 of 81153 MiB; workspace does not fit, using per-patch alignment.",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10441-L-auto@39/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10441-L-auto@39/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 50,
+        "peak_gpu_used_mib": 79151,
+        "peak_motioncorr_above_baseline_mib": 37930,
+        "peak_compute_app_mib": 39832,
+        "min_free_mib": 2004
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        0
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@none",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 12.19,
+      "free_vram_after_balloon_mib": 81154,
+      "max_rss_mib": 5161,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "this is the unconstrained baseline"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10441-L-auto@none/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10441-L-auto@none/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 42,
+        "peak_gpu_used_mib": 40275,
+        "peak_motioncorr_above_baseline_mib": 40274,
+        "peak_compute_app_mib": 37924,
+        "min_free_mib": 40879
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        4
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10474f4-L-auto@18.5",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 62.42,
+      "free_vram_after_balloon_mib": 18941,
+      "max_rss_mib": 21836,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Movie FFT: batch=1 R2C work=67141632 C2R work=67141632 shared work=67141632 inverse tile=67141632 bytes",
+            "Staging this movie as native unsigned 16-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 4831838208 bytes for 144 x 4096 x 4096 samples, released before any float movie is materialized.",
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint16 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 62146 of 81153 MiB; workspace 310 MiB + cuFFT work 25 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 1448 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB"
+          ],
+          "only_in_candidate": [
+            "ERROR: Movie FFT scratch allocation failed for batch=1 workspace=67141632 tile=67141632: out of memory",
+            "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 144 --i movies.star --j 8 --eer_grouping 40 --eer_upsampling 1 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10474f4-L-auto@18.5/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10474f4-L-auto@18.5/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10474f4": {
+          "movie": "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+          "bytes": 2931223304
+        }
+      },
+      "sampled": {
+        "n": 206,
+        "peak_gpu_used_mib": 72973,
+        "peak_motioncorr_above_baseline_mib": 10760,
+        "peak_compute_app_mib": 10754,
+        "min_free_mib": 8182
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10474f4-L-auto@19",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 172.8,
+      "free_vram_after_balloon_mib": 19453,
+      "max_rss_mib": 26449,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint16 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 62146 of 81153 MiB; workspace 310 MiB + cuFFT work 25 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 1448 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB"
+          ],
+          "only_in_candidate": [
+            "Local alignment admission declined: requires 1266658848 bytes of workspace, available 471007232 bytes; falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 144 --i movies.star --j 8 --eer_grouping 40 --eer_upsampling 1 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10474f4-L-auto@19/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10474f4-L-auto@19/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10474f4": {
+          "movie": "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+          "bytes": 2931223304
+        }
+      },
+      "sampled": {
+        "n": 389,
+        "peak_gpu_used_mib": 80797,
+        "peak_motioncorr_above_baseline_mib": 19096,
+        "peak_compute_app_mib": 19090,
+        "min_free_mib": 358
+      },
+      "local_admission": [
+        "Local alignment admission declined: requires 1266658848 bytes of workspace, available 471007232 bytes; falling back to streaming pipeline."
+      ],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10474f4-L-auto@19.5",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 130.49,
+      "free_vram_after_balloon_mib": 19965,
+      "max_rss_mib": 26448,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint16 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 62146 of 81153 MiB; workspace 310 MiB + cuFFT work 25 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 1448 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB"
+          ],
+          "only_in_candidate": [
+            "Local alignment admission declined: requires 1266658848 bytes of workspace, available 1007878144 bytes; falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 144 --i movies.star --j 8 --eer_grouping 40 --eer_upsampling 1 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10474f4-L-auto@19.5/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10474f4-L-auto@19.5/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10474f4": {
+          "movie": "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+          "bytes": 2931223304
+        }
+      },
+      "sampled": {
+        "n": 344,
+        "peak_gpu_used_mib": 80285,
+        "peak_motioncorr_above_baseline_mib": 19096,
+        "peak_compute_app_mib": 19090,
+        "min_free_mib": 870
+      },
+      "local_admission": [
+        "Local alignment admission declined: requires 1266658848 bytes of workspace, available 1007878144 bytes; falling back to streaming pipeline."
+      ],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10474f4-L-auto@20",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 19.99,
+      "free_vram_after_balloon_mib": 20477,
+      "max_rss_mib": 7627,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 62146 of 81153 MiB; workspace 310 MiB + cuFFT work 25 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 1448 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB"
+          ],
+          "only_in_candidate": [
+            "Batched patch alignment: 25 patches, chunk size 0 (cap 4, 0 chunk(s)); free device memory 1473 of 81153 MiB; workspace does not fit, using per-patch alignment.",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 144 --i movies.star --j 8 --eer_grouping 40 --eer_upsampling 1 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10474f4-L-auto@20/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10474f4-L-auto@20/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10474f4": {
+          "movie": "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+          "bytes": 2931223304
+        }
+      },
+      "sampled": {
+        "n": 63,
+        "peak_gpu_used_mib": 80869,
+        "peak_motioncorr_above_baseline_mib": 20192,
+        "peak_compute_app_mib": 19090,
+        "min_free_mib": 286
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        0
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10474f4-L-auto@none",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 54.1,
+      "free_vram_after_balloon_mib": 81154,
+      "max_rss_mib": 7625,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "this is the unconstrained baseline"
+      },
+      "witness": [
+        "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 144 --i movies.star --j 8 --eer_grouping 40 --eer_upsampling 1 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10474f4-L-auto@none/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-124a8708/e10474f4-L-auto@none/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10474f4": {
+          "movie": "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+          "bytes": 2931223304
+        }
+      },
+      "sampled": {
+        "n": 103,
+        "peak_gpu_used_mib": 19347,
+        "peak_motioncorr_above_baseline_mib": 19346,
+        "peak_compute_app_mib": 20446,
+        "min_free_mib": 61807
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        4
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    }
+  ],
+  "runs-d2-728f7ada": [
+    {
+      "spec": "e10216-L-auto@7.5",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 15.47,
+      "free_vram_after_balloon_mib": 7677,
+      "max_rss_mib": 7880,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Movie FFT: batch=1 R2C work=67141632 C2R work=67141632 shared work=67141632 inverse tile=67141632 bytes",
+            "Staging this movie as native signed 16-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 1979711488 bytes for 59 x 4096 x 4096 samples, released before any float movie is materialized.",
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native int16 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 73030 of 81153 MiB; workspace 127 MiB + cuFFT work 10 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 602 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB"
+          ],
+          "only_in_candidate": [
+            "ERROR: Movie buffer allocation failed: out of memory",
+            "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Dose weighting and summing frames (CUDA)...",
+            "Peak VRAM: 288.08 MiB",
+            "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10216-L-auto@7.5/out/Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 59 --i movies.star --j 8 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10216-L-auto@7.5/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10216-L-auto@7.5/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10216": {
+          "movie": "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs",
+          "source": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc",
+          "bytes": 1979712512
+        }
+      },
+      "sampled": {
+        "n": 56,
+        "peak_gpu_used_mib": 78145,
+        "peak_motioncorr_above_baseline_mib": 4668,
+        "peak_compute_app_mib": 4662,
+        "min_free_mib": 3010
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10216-L-auto@8",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 17.75,
+      "free_vram_after_balloon_mib": 8189,
+      "max_rss_mib": 7850,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native int16 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 73030 of 81153 MiB; workspace 127 MiB + cuFFT work 10 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 602 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB"
+          ],
+          "only_in_candidate": [
+            "CUDA Error in /mnt/clathrin/alex-motioncorr-226/base/src/acc/cuda/cuda_movie_session.cu:893 : out of memory",
+            "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing.",
+            "Materialized native int16 frames as float for CPU fallback.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Dose weighting and summing frames (CUDA)...",
+            "Peak VRAM: 288.08 MiB",
+            "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10216-L-auto@8/out/Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 59 --i movies.star --j 8 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10216-L-auto@8/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10216-L-auto@8/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10216": {
+          "movie": "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs",
+          "source": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc",
+          "bytes": 1979712512
+        }
+      },
+      "sampled": {
+        "n": 65,
+        "peak_gpu_used_mib": 81145,
+        "peak_motioncorr_above_baseline_mib": 8180,
+        "peak_compute_app_mib": 8174,
+        "min_free_mib": 10
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": true,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10216-L-auto@8.5",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 16.38,
+      "free_vram_after_balloon_mib": 8701,
+      "max_rss_mib": 8001,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 73030 of 81153 MiB; workspace 127 MiB + cuFFT work 10 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 602 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB"
+          ],
+          "only_in_candidate": [
+            "Batched patch alignment: 25 patches, chunk size 0 (cap 4, 0 chunk(s)); free device memory 581 of 81153 MiB; workspace does not fit, using per-patch alignment.",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Resident patch retry admission declined: requires 158299360 bytes, available 78839808 bytes; falling back to streaming pipeline.",
+            "Dose weighting and summing frames (CUDA)...",
+            "Peak VRAM: 288.08 MiB",
+            "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10216-L-auto@8.5/out/Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 59 --i movies.star --j 8 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10216-L-auto@8.5/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10216-L-auto@8.5/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10216": {
+          "movie": "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs",
+          "source": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc",
+          "bytes": 1979712512
+        }
+      },
+      "sampled": {
+        "n": 62,
+        "peak_gpu_used_mib": 81079,
+        "peak_motioncorr_above_baseline_mib": 8626,
+        "peak_compute_app_mib": 8620,
+        "min_free_mib": 76
+      },
+      "local_admission": [],
+      "retry_admission": [
+        "Resident patch retry admission declined: requires 158299360 bytes, available 78839808 bytes; falling back to streaming pipeline."
+      ],
+      "batch_chunks": [
+        0
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10216-L-auto@8.75",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 3.1,
+      "free_vram_after_balloon_mib": 8957,
+      "max_rss_mib": 2121,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 73030 of 81153 MiB; workspace 127 MiB + cuFFT work 10 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 602 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  127.60 MiB",
+            "Peak GPU memory allocated:    138.20 MiB"
+          ],
+          "only_in_candidate": [
+            "Batched patch alignment: 25 patches, chunk size 0 (cap 4, 0 chunk(s)); free device memory 837 of 81153 MiB; workspace does not fit, using per-patch alignment.",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB",
+            "Peak GPU memory allocated:    42.56 MiB",
+            "Buffer VRAM:                  31.97 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 59 --i movies.star --j 8 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10216-L-auto@8.75/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10216-L-auto@8.75/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10216": {
+          "movie": "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs",
+          "source": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc",
+          "bytes": 1979712512
+        }
+      },
+      "sampled": {
+        "n": 11,
+        "peak_gpu_used_mib": 80999,
+        "peak_motioncorr_above_baseline_mib": 8802,
+        "peak_compute_app_mib": 8772,
+        "min_free_mib": 156
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        0
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10216-L-auto@none",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 3.25,
+      "free_vram_after_balloon_mib": 81154,
+      "max_rss_mib": 2043,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "this is the unconstrained baseline"
+      },
+      "witness": [
+        "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 59 --i movies.star --j 8 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10216-L-auto@none/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10216-L-auto@none/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10216": {
+          "movie": "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs",
+          "source": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc",
+          "bytes": 1979712512
+        }
+      },
+      "sampled": {
+        "n": 12,
+        "peak_gpu_used_mib": 8877,
+        "peak_motioncorr_above_baseline_mib": 8876,
+        "peak_compute_app_mib": 8868,
+        "min_free_mib": 72277
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        4
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@36.5",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 65.17,
+      "free_vram_after_balloon_mib": 37373,
+      "max_rss_mib": 37267,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Movie FFT: batch=1 R2C work=377184192 C2R work=377184192 shared work=377184192 inverse tile=377184192 bytes",
+            "nvCOMP ingestion declined (bits per sample != 16); using the host reader.",
+            "Staging this movie as native unsigned 8-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 4713984000 bytes for 50 x 11520 x 8184 samples, released before any float movie is materialized.",
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint8 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43666 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2788 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB"
+          ],
+          "only_in_candidate": [
+            "ERROR: Movie FFT scratch allocation failed for batch=1 workspace=377184192 tile=377184192: out of memory",
+            "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10441-L-auto@36.5/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10441-L-auto@36.5/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 242,
+        "peak_gpu_used_mib": 64361,
+        "peak_motioncorr_above_baseline_mib": 20580,
+        "peak_compute_app_mib": 20574,
+        "min_free_mib": 16794
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@37",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 73.88,
+      "free_vram_after_balloon_mib": 37885,
+      "max_rss_mib": 37269,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint8 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43666 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2788 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB"
+          ],
+          "only_in_candidate": [
+            "CUDA Error in /mnt/clathrin/alex-motioncorr-226/base/src/acc/cuda/cuda_movie_session.cu:793 : out of memory",
+            "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing.",
+            "Materialized native uint8 frames as float for CPU fallback.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10441-L-auto@37/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10441-L-auto@37/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 263,
+        "peak_gpu_used_mib": 80749,
+        "peak_motioncorr_above_baseline_mib": 37480,
+        "peak_compute_app_mib": 37474,
+        "min_free_mib": 406
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": true,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@37.5",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 86.46,
+      "free_vram_after_balloon_mib": 38397,
+      "max_rss_mib": 41764,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint8 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43666 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2788 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB"
+          ],
+          "only_in_candidate": [
+            "Local alignment admission declined: requires 2463998576 bytes of workspace, available 957546496 bytes; falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10441-L-auto@37.5/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10441-L-auto@37.5/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 274,
+        "peak_gpu_used_mib": 80687,
+        "peak_motioncorr_above_baseline_mib": 37930,
+        "peak_compute_app_mib": 37924,
+        "min_free_mib": 468
+      },
+      "local_admission": [
+        "Local alignment admission declined: requires 2463998576 bytes of workspace, available 957546496 bytes; falling back to streaming pipeline."
+      ],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@38",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 87.2,
+      "free_vram_after_balloon_mib": 38909,
+      "max_rss_mib": 41766,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint8 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43666 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2788 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB"
+          ],
+          "only_in_candidate": [
+            "Local alignment admission declined: requires 2463998576 bytes of workspace, available 1494417408 bytes; falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10441-L-auto@38/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10441-L-auto@38/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 302,
+        "peak_gpu_used_mib": 80175,
+        "peak_motioncorr_above_baseline_mib": 37930,
+        "peak_compute_app_mib": 37924,
+        "min_free_mib": 980
+      },
+      "local_admission": [
+        "Local alignment admission declined: requires 2463998576 bytes of workspace, available 1494417408 bytes; falling back to streaming pipeline."
+      ],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@38.5",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 91.43,
+      "free_vram_after_balloon_mib": 39421,
+      "max_rss_mib": 41766,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint8 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43666 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2788 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB"
+          ],
+          "only_in_candidate": [
+            "Local alignment admission declined: requires 2463998576 bytes of workspace, available 2031288320 bytes; falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10441-L-auto@38.5/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10441-L-auto@38.5/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 336,
+        "peak_gpu_used_mib": 79663,
+        "peak_motioncorr_above_baseline_mib": 37930,
+        "peak_compute_app_mib": 37924,
+        "min_free_mib": 1492
+      },
+      "local_admission": [
+        "Local alignment admission declined: requires 2463998576 bytes of workspace, available 2031288320 bytes; falling back to streaming pipeline."
+      ],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@39",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 8.28,
+      "free_vram_after_balloon_mib": 39933,
+      "max_rss_mib": 5164,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43666 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2788 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB"
+          ],
+          "only_in_candidate": [
+            "Batched patch alignment: 25 patches, chunk size 0 (cap 4, 0 chunk(s)); free device memory 2449 of 81153 MiB; workspace does not fit, using per-patch alignment.",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB",
+            "Peak GPU memory allocated:    191.77 MiB",
+            "Buffer VRAM:                  144.14 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10441-L-auto@39/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10441-L-auto@39/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 29,
+        "peak_gpu_used_mib": 81059,
+        "peak_motioncorr_above_baseline_mib": 39838,
+        "peak_compute_app_mib": 39832,
+        "min_free_mib": 96
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        0
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@none",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 8.55,
+      "free_vram_after_balloon_mib": 81154,
+      "max_rss_mib": 5162,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "this is the unconstrained baseline"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10441-L-auto@none/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10441-L-auto@none/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 30,
+        "peak_gpu_used_mib": 37933,
+        "peak_motioncorr_above_baseline_mib": 37932,
+        "peak_compute_app_mib": 40266,
+        "min_free_mib": 43221
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        4
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10474f4-L-auto@18.5",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 47.26,
+      "free_vram_after_balloon_mib": 18941,
+      "max_rss_mib": 21808,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Movie FFT: batch=1 R2C work=67141632 C2R work=67141632 shared work=67141632 inverse tile=67141632 bytes",
+            "Staging this movie as native unsigned 16-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 4831838208 bytes for 144 x 4096 x 4096 samples, released before any float movie is materialized.",
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint16 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 62146 of 81153 MiB; workspace 310 MiB + cuFFT work 25 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 1448 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB"
+          ],
+          "only_in_candidate": [
+            "ERROR: Movie FFT scratch allocation failed for batch=1 workspace=67141632 tile=67141632: out of memory",
+            "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 144 --i movies.star --j 8 --eer_grouping 40 --eer_upsampling 1 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10474f4-L-auto@18.5/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10474f4-L-auto@18.5/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10474f4": {
+          "movie": "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+          "bytes": 2931223304
+        }
+      },
+      "sampled": {
+        "n": 141,
+        "peak_gpu_used_mib": 72973,
+        "peak_motioncorr_above_baseline_mib": 10760,
+        "peak_compute_app_mib": 10754,
+        "min_free_mib": 8182
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10474f4-L-auto@19",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 52.92,
+      "free_vram_after_balloon_mib": 19453,
+      "max_rss_mib": 26447,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint16 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 62146 of 81153 MiB; workspace 310 MiB + cuFFT work 25 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 1448 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB"
+          ],
+          "only_in_candidate": [
+            "Local alignment admission declined: requires 1266658848 bytes of workspace, available 471007232 bytes; falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 144 --i movies.star --j 8 --eer_grouping 40 --eer_upsampling 1 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10474f4-L-auto@19/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10474f4-L-auto@19/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10474f4": {
+          "movie": "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+          "bytes": 2931223304
+        }
+      },
+      "sampled": {
+        "n": 194,
+        "peak_gpu_used_mib": 80797,
+        "peak_motioncorr_above_baseline_mib": 19096,
+        "peak_compute_app_mib": 19090,
+        "min_free_mib": 358
+      },
+      "local_admission": [
+        "Local alignment admission declined: requires 1266658848 bytes of workspace, available 471007232 bytes; falling back to streaming pipeline."
+      ],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10474f4-L-auto@19.5",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 55.17,
+      "free_vram_after_balloon_mib": 19965,
+      "max_rss_mib": 26446,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint16 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 62146 of 81153 MiB; workspace 310 MiB + cuFFT work 25 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 1448 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB"
+          ],
+          "only_in_candidate": [
+            "Local alignment admission declined: requires 1266658848 bytes of workspace, available 1007878144 bytes; falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB",
+            "Peak GPU memory allocated:    446.09 MiB",
+            "Buffer VRAM:                  420.23 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 144 --i movies.star --j 8 --eer_grouping 40 --eer_upsampling 1 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10474f4-L-auto@19.5/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10474f4-L-auto@19.5/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10474f4": {
+          "movie": "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+          "bytes": 2931223304
+        }
+      },
+      "sampled": {
+        "n": 177,
+        "peak_gpu_used_mib": 80285,
+        "peak_motioncorr_above_baseline_mib": 19096,
+        "peak_compute_app_mib": 19090,
+        "min_free_mib": 870
+      },
+      "local_admission": [
+        "Local alignment admission declined: requires 1266658848 bytes of workspace, available 1007878144 bytes; falling back to streaming pipeline."
+      ],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10474f4-L-auto@20",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 13.86,
+      "free_vram_after_balloon_mib": 20477,
+      "max_rss_mib": 7625,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 62146 of 81153 MiB; workspace 310 MiB + cuFFT work 25 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 1448 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  310.26 MiB",
+            "Peak GPU memory allocated:    336.13 MiB"
+          ],
+          "only_in_candidate": [
+            "Batched patch alignment: 25 patches, chunk size 0 (cap 4, 0 chunk(s)); free device memory 1473 of 81153 MiB; workspace does not fit, using per-patch alignment.",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB",
+            "Peak GPU memory allocated:    103.50 MiB",
+            "Buffer VRAM:                  77.63 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 144 --i movies.star --j 8 --eer_grouping 40 --eer_upsampling 1 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10474f4-L-auto@20/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10474f4-L-auto@20/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10474f4": {
+          "movie": "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+          "bytes": 2931223304
+        }
+      },
+      "sampled": {
+        "n": 43,
+        "peak_gpu_used_mib": 80895,
+        "peak_motioncorr_above_baseline_mib": 20218,
+        "peak_compute_app_mib": 20212,
+        "min_free_mib": 260
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        0
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10474f4-L-auto@none",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 13.74,
+      "free_vram_after_balloon_mib": 81154,
+      "max_rss_mib": 7626,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "this is the unconstrained baseline"
+      },
+      "witness": [
+        "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d2/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 144 --i movies.star --j 8 --eer_grouping 40 --eer_upsampling 1 --o /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10474f4-L-auto@none/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d2-728f7ada/e10474f4-L-auto@none/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10474f4": {
+          "movie": "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+          "bytes": 2931223304
+        }
+      },
+      "sampled": {
+        "n": 44,
+        "peak_gpu_used_mib": 19099,
+        "peak_motioncorr_above_baseline_mib": 19098,
+        "peak_compute_app_mib": 19338,
+        "min_free_mib": 62055
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        4
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    }
+  ]
+}

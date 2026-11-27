@@ -73,6 +73,8 @@ DEFAULT_REQUIRED_TESTS = [
     # collected; the CUDA-only CudaErrorClass is not listed here, matching
     # the existing exclusion of CudaWrapperUploadFailure.
     "PatchRetryState",
+    # #226 D2: complete conditional retry live-byte and overflow accounting.
+    "PatchRetryAdmission",
     # CPU dose weighting (#179, #220): exact bits against the frozen base
     # doseWeighting, including the FMA-contraction signed-zero case, for the
     # selected path and for the forced original path.
@@ -172,6 +174,7 @@ CUDA_REQUIRED_TESTS = [
     # degrades or refuses the next movie. The only test that sets the runtime's real
     # last-error slot before a healthy movie.
     "CudaStaleErrorAfterOom",
+    "CudaLocalAdmission",
 ]
 
 

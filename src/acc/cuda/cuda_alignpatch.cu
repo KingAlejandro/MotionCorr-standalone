@@ -1,3 +1,4 @@
+#include "src/acc/cuda/cuda_hermitian.cuh"
 #ifdef _CUDA_ENABLED
 
 #include "src/acc/cuda/cuda_alignpatch.h"
@@ -622,6 +623,7 @@ bool cudaAlignPatchDeviceWithWorkspace(
 
         // 3. Batched cuFFT C2R
         if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_cufft));
+        ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
         ALIGN_CUFFT(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
         if (timed) {
             ALIGN_CUDA(cudaEventRecord(ev_stop_cufft));
@@ -985,6 +987,7 @@ void cudaAlignPatchBatchDevice(
             ALIGN_LAUNCH(cudaGetLastError());
             computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, w.d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, ccf_nfx, ccf_nfy, n_frames);
             ALIGN_LAUNCH(cudaGetLastError());
+            ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
             ALIGN_CUFFT(cufftExecC2R(w.plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
             findPeakAndInterpolateKernel<<<n_frames, 256>>>(
                 d_Iccs, d_cur_x + p * n, d_cur_y + p * n,

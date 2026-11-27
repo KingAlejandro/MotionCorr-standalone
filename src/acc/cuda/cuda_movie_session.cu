@@ -1,3 +1,4 @@
+#include "src/acc/cuda/cuda_hermitian.cuh"
 #include "src/acc/cuda/cuda_movie_session.h"
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
@@ -2114,6 +2115,13 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
         if (copy != cudaSuccess) {
             logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " << cudaGetErrorString(copy) << std::endl;
             recordFailure(copy, __func__, __LINE__);
+            drain_after_failure();
+            return false;
+        }
+        const cudaError_t projection = mc_cuda::projectHermitianColumns(d_inverse_tile, nx, ny);
+        if (projection != cudaSuccess) {
+            logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " << cudaGetErrorString(projection) << std::endl;
+            recordFailure(projection, __func__, __LINE__);
             drain_after_failure();
             return false;
         }

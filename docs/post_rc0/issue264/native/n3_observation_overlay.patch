@@ -1,0 +1,32 @@
+diff --git a/src/motioncorr_runner.cpp b/src/motioncorr_runner.cpp
+index 9b07e1a1..56fb0c71 100644
+--- a/src/motioncorr_runner.cpp
++++ b/src/motioncorr_runner.cpp
+@@ -3847,6 +3847,27 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
+         }
+ #endif
+ 
++		// TEST-ONLY #264 N3 overlay (docs/post_rc0/issue264/native). Never part of a
++		// production build: replaces the measured patch shifts with a known model
++		// evaluated at the measured positions and frames, before the real fit and guard.
++		if (const char *mc264_spec = getenv("MC264_N3_COEFFS")) {
++			ThirdOrderPolynomialModel injected;
++			injected.coeffX.initZeros(18); injected.coeffY.initZeros(18);
++			std::istringstream in(mc264_spec);
++			for (int i = 0; i < 36; i++) {
++				RFLOAT value;
++				if (!(in >> value)) REPORT_ERROR("MC264_N3_COEFFS needs 36 numbers");
++				(i < 18 ? injected.coeffX(i) : injected.coeffY(i - 18)) = value;
++			}
++			std::string extra;
++			if (in >> extra) REPORT_ERROR("MC264_N3_COEFFS has more than 36 numbers");
++			for (size_t i = 0; i < patch_frames.size(); i++)
++				injected.getShiftAt(patch_frames[i], patch_xs[i] / nx - 0.5, patch_ys[i] / ny - 0.5,
++				                    patch_xshifts[i], patch_yshifts[i]);
++			std::cerr << "MC264_N3 overlay applied n_obs=" << patch_frames.size()
++			          << " nx=" << nx << " ny=" << ny << " n_frames=" << n_frames << std::endl;
++		}
++
+ 		// Fit polynomial model
+ 		MC_STAGE("fit polynomial");
+ 		RCTIC(TIMING_FIT_POLYNOMIAL);

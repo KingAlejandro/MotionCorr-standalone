@@ -1,0 +1,304 @@
+{
+ "all_controls_ok": true,
+ "n": 33,
+ "results": [
+  {
+   "control": "real_evidence_star_layer_pass_full_unrun",
+   "exit": 2,
+   "expected_exit": 2,
+   "expected_text": null,
+   "problems": [],
+   "control_ok": true
+  },
+  {
+   "control": "trailing_zero_representation_equal",
+   "exit": 2,
+   "expected_exit": 2,
+   "expected_text": null,
+   "problems": [],
+   "control_ok": true
+  },
+  {
+   "control": "full_pass_with_generated_mrcs",
+   "exit": 0,
+   "expected_exit": 0,
+   "expected_text": null,
+   "problems": [],
+   "control_ok": true
+  },
+  {
+   "control": "mrc_extended_header_ignored",
+   "exit": 0,
+   "expected_exit": 0,
+   "expected_text": null,
+   "problems": [],
+   "control_ok": true
+  },
+  {
+   "control": "value_changed_1e-6",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "CPU pairs not 8",
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "missing_frame",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "frames",
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "duplicate_frame",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "frames",
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "malformed_token",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "malformed row",
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "nan_token",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "malformed row",
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "inf_token",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "malformed row",
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "negative_zero_sign",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "CPU pairs not 8",
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "wrong_label",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "schema",
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "missing_label",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "schema",
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "wrong_label_index",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "schema",
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "second_global_block",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "2 data_global_shift blocks",
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "global_block_absent",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "0 data_global_shift blocks",
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "mrc_wrong_payload_where_equal_expected",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "image relation failed",
+   "problems": [
+    "image relation failed: ['F_mild_both_accept']"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "mrc_equal_where_flip_expected",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "image relation failed",
+   "problems": [
+    "image relation failed: ['A_x_legacy_false_accept']"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "mrc_malformed_short",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "image relation failed",
+   "problems": [
+    "image relation failed: ['G_large_both_reject']"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "mrc_one_missing_full_unrun",
+   "exit": 2,
+   "expected_exit": 2,
+   "expected_text": null,
+   "problems": [],
+   "control_ok": true
+  },
+  {
+   "control": "row_rule_absent_overlay",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "CPU rows not 24 PASS",
+   "problems": [
+    "CPU rows not 24 PASS: ['ov-base-cpu/G_large_both_reject:FAIL']",
+    "row parity with the original grader failed"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "mutant_takes_candidate_decision",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "N4 not PASS",
+   "problems": [
+    "CPU rows not 24 PASS: ['ov-mut-cpu/A_x_legacy_false_accept:FAIL']",
+    "N4 not PASS on the expected kills",
+    "row parity with the original grader failed"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "binary_differs_from_receipt",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "CPU rows not 24 PASS",
+   "problems": [
+    "CPU rows not 24 PASS: ['ov-cand-cpu/F_mild_both_accept:FAIL']",
+    "row parity with the original grader failed"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "injected_spec_differs",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "CPU rows not 24 PASS",
+   "problems": [
+    "CPU rows not 24 PASS: ['ov-base-cpu/B_x_legacy_false_reject:FAIL']"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "stdout_not_bound",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "CPU rows not 24 PASS",
+   "problems": [
+    "CPU rows not 24 PASS: ['ov-mut-cpu/B_y_legacy_false_reject:FAIL']",
+    "N4 not PASS on the expected kills",
+    "row parity with the original grader failed"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "missing_cpu_row",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "CPU rows not 24 PASS",
+   "problems": [
+    "CPU rows not 24 PASS: ['ov-cand-cpu/E_xy_nonsquare_near_threshold:UNRUN']",
+    "CPU pairs not 8 with equal global rows",
+    "row parity with the original grader failed"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "cuda_artefact_present",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "CUDA rows are not exactly 16 UNRUN",
+   "problems": [
+    "CUDA rows are not exactly 16 UNRUN with no artefact"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "unsafe_member",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_text": "unsafe member",
+   "problems": [
+    "invalid input: unsafe member ../escape"
+   ],
+   "control_ok": true
+  },
+  {
+   "control": "wrong_tar_hash",
+   "control_ok": true
+  },
+  {
+   "control": "wrong_predictions_hash",
+   "control_ok": true
+  },
+  {
+   "control": "existing_out_refused",
+   "control_ok": true
+  },
+  {
+   "control": "directory_input_star_layer_pass_full_unrun",
+   "control_ok": true
+  },
+  {
+   "control": "directory_input_symlink_refused",
+   "control_ok": true
+  }
+ ]
+}

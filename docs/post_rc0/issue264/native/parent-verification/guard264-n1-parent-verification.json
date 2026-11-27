@@ -1,0 +1,50 @@
+{
+  "raw_sha256": "c2a94875a6c79051c5ae3a0e21497fbe13d92906aff2f22c38633e661dc369dc",
+  "source_head": "0a1f64ab3e192c3ebad57b35149d872b21331730",
+  "source_clean": true,
+  "captured_utc": "2026-10-22T21:11:24.680307+00:00",
+  "configs": {
+    "cpu": {
+      "pass": 77,
+      "listed_equal_run": true,
+      "no_duplicate_or_skipped_or_failure_or_error": true,
+      "collection_exit": 0,
+      "stage_exit": 0,
+      "required_guard_tests_present": true,
+      "binary_hash_line": "binary sha256: c0c0437844728d55428d9a27de59b1d3dd8f6c2433ca13d2f23abd8fd1cc4d3a",
+      "source_header": "start 2026-10-22T20:28:24Z cfg=cpu HEAD=0a1f64ab3e192c3ebad57b35149d872b21331730 status=0"
+    },
+    "cuda": {
+      "pass": 111,
+      "listed_equal_run": true,
+      "no_duplicate_or_skipped_or_failure_or_error": true,
+      "collection_exit": 0,
+      "stage_exit": 0,
+      "required_guard_tests_present": true,
+      "binary_hash_line": "binary sha256: 7817030d908a6f3312219a183e3abe582e937aa7a3fe71b5f8c99010d78bd92f",
+      "source_header": "start 2026-10-22T20:42:19Z cfg=cuda HEAD=0a1f64ab3e192c3ebad57b35149d872b21331730 status=0"
+    },
+    "nvcomp": {
+      "pass": 114,
+      "listed_equal_run": true,
+      "no_duplicate_or_skipped_or_failure_or_error": true,
+      "collection_exit": 0,
+      "stage_exit": 0,
+      "required_guard_tests_present": true,
+      "binary_hash_line": "binary sha256: b77d6e116373abc799f3ee22b16e6edde388b2e742dd7b2834025b3767dfb550",
+      "source_header": "start 2026-10-22T20:58:24Z cfg=nvcomp HEAD=0a1f64ab3e192c3ebad57b35149d872b21331730 status=0"
+    }
+  },
+  "limitations": [
+    "N1 CTest/source/collection only; N2/N3/N4 remain incomplete.",
+    "Listed sets obtained from existing configured builds; not a historical frozen expected-union file.",
+    "GPU health receipts are verified separately, not inferred from exit0."
+  ],
+  "health_files": [
+    "logs/health-ctest-cuda-post.txt",
+    "logs/health-ctest-cuda-pre.txt",
+    "logs/health-ctest-nvcomp-post.txt",
+    "logs/health-ctest-nvcomp-pre.txt"
+  ],
+  "health": "Four UUID-bound pre/post receipts PASS, no compute process, volatile uncorrected ECC0 and pending/failure remap No; narrower than C1 XML health, no aggregate ECC/kernel Xid claim"
+}

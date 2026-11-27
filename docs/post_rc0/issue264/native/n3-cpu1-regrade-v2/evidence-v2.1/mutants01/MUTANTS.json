@@ -1,0 +1,346 @@
+{
+ "all_consistent": false,
+ "declared": {
+  "killed": 20,
+  "equivalent": 5,
+  "redundant": 5,
+  "untested": 3
+ },
+ "results": [
+  {
+   "mutant": "y_ignored",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "y_value_changed"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "sign_removed",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "x_signed_zero",
+    "y_signed_zero"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "frame_token_numeric_only",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "frame_leading_zero"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "ascii_line_check_removed",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "frame_superscript",
+    "value_arabic_indic_digit"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "value_regex_unicode",
+   "declared": "equivalent",
+   "reason": "every non-ASCII digit is rejected first by the ASCII line check",
+   "killed": false,
+   "killed_by": [],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "row_count_check_removed",
+   "declared": "untested",
+   "reason": "no control truncates the last frame; frames 1..k still pass the token check",
+   "killed": false,
+   "killed_by": [],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "nonfinite_check_removed",
+   "declared": "equivalent",
+   "reason": "the ASCII value grammar admits no NaN/inf token",
+   "killed": false,
+   "killed_by": [],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "mrc_size_check_removed",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "mrc_header_only_all",
+    "mrc_truncated",
+    "mrc_oversize",
+    "mrc_nonzero_nsymbt",
+    "dir_precheck_header_only"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "mrc_descriptor_check_removed",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "mrc_wrong_mode",
+    "mrc_wrong_shape"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "mrc_map_word_removed",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "mrc_map_word_missing"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "pair_descriptor_equality_removed",
+   "declared": "equivalent",
+   "reason": "every accepted MRC has exactly MRC_DESCRIPTOR, so two accepted descriptors are always equal",
+   "killed": false,
+   "killed_by": [],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "contradiction_gate_removed",
+   "declared": "redundant",
+   "reason": "the original booleans equal the decision relation on this evidence, so the relation rule fails on the same inputs",
+   "killed": true,
+   "killed_by": [
+    "mrc_wrong_payload_where_equal",
+    "mrc_equal_where_flip"
+   ],
+   "consistent_with_declaration": false
+  },
+  {
+   "mutant": "relation_rule_removed",
+   "declared": "redundant",
+   "reason": "the contradiction gate fails on the same inputs (same reason, reversed)",
+   "killed": false,
+   "killed_by": [],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "reread_check_removed",
+   "declared": "untested",
+   "reason": "no control can change an input between the two reads without a test hook; the hook was deliberately not added",
+   "killed": false,
+   "killed_by": [],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "precheck_binding_removed",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "dir_changed_after_precheck"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "manifest_binding_removed",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "manifest_mismatch_after_edit"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "symlink_leaf_read_as_missing",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "dir_symlink_leaf_mrc"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "dir_component_followed",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "dir_symlink_dir_component",
+    "live_symlink_component"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "out_inside_scratch_allowed",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "dir_out_inside_scratch"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "noncanonical_root_allowed",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "dir_out_inside_scratch",
+    "dir_noncanonical_root"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "run_argv_binding_removed",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "run_arm_case_cwd_argv_unbound",
+    "run_argv_option_changed",
+    "dir_out_inside_scratch"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "run_arm_binding_removed",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "run_arm_case_cwd_argv_unbound",
+    "dir_out_inside_scratch"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "distinct_receipts_removed",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "binaries_not_distinct",
+    "dir_out_inside_scratch"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "spec_hash_check_removed",
+   "declared": "redundant",
+   "reason": "the receipts file is sha256-pinned, so its spec_sha256 field cannot disagree",
+   "killed": true,
+   "killed_by": [
+    "dir_out_inside_scratch"
+   ],
+   "consistent_with_declaration": false
+  },
+  {
+   "mutant": "receipt_vs_prediction_removed",
+   "declared": "redundant",
+   "reason": "receipts and predictions are both sha256-pinned and consistent",
+   "killed": true,
+   "killed_by": [
+    "dir_out_inside_scratch"
+   ],
+   "consistent_with_declaration": false
+  },
+  {
+   "mutant": "parity_check_removed",
+   "declared": "redundant",
+   "reason": "a regression guard for the port; every control that changes a row also trips a row rule or binding",
+   "killed": true,
+   "killed_by": [
+    "dir_out_inside_scratch"
+   ],
+   "consistent_with_declaration": false
+  },
+  {
+   "mutant": "n4_exact_kills_removed",
+   "declared": "equivalent",
+   "reason": "mutant rows must match the uncentred predictions, which fixes the kill set",
+   "killed": true,
+   "killed_by": [
+    "dir_out_inside_scratch"
+   ],
+   "consistent_with_declaration": false
+  },
+  {
+   "mutant": "pair_count_removed",
+   "declared": "equivalent",
+   "reason": "eight pairs exist whenever 24 CPU rows PASS",
+   "killed": true,
+   "killed_by": [
+    "dir_out_inside_scratch"
+   ],
+   "consistent_with_declaration": false
+  },
+  {
+   "mutant": "live_index_check_removed",
+   "declared": "untested",
+   "reason": "with GIT_OPTIONAL_LOCKS=0 git does not write the index, so no control can make this fire",
+   "killed": true,
+   "killed_by": [
+    "dir_out_inside_scratch"
+   ],
+   "consistent_with_declaration": false
+  },
+  {
+   "mutant": "live_optional_locks_enabled",
+   "declared": "killed",
+   "reason": "the stale-index control must then see git rewrite the index",
+   "killed": true,
+   "killed_by": [
+    "dir_out_inside_scratch"
+   ],
+   "consistent_with_declaration": false
+  },
+  {
+   "mutant": "live_distinct_removed",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "dir_out_inside_scratch",
+    "live_binaries_not_distinct"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "live_process_scan_ignored",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "dir_out_inside_scratch",
+    "live_active_process"
+   ],
+   "consistent_with_declaration": true
+  },
+  {
+   "mutant": "live_receipt_ignored",
+   "declared": "killed",
+   "reason": "",
+   "killed": true,
+   "killed_by": [
+    "dir_out_inside_scratch",
+    "live_binary_differs_from_receipt"
+   ],
+   "consistent_with_declaration": true
+  }
+ ]
+}

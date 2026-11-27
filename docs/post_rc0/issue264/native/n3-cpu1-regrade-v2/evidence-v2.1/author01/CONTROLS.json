@@ -1,0 +1,906 @@
+{
+ "all_controls_ok": true,
+ "n": 65,
+ "grader": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-96f54dde/docs/post_rc0/issue264/native/n3-cpu1-regrade-v2/regrade_v2_1.py",
+ "grader_sha256": "00cb38b3992759fec38b310ac3ae074b6ea6025fb046c0a8ba2b59ba7767b836",
+ "amendment_sha256": "e556f54c551b0fb656d55967fccabda89ce7335246204620b9e1e21fe0b11af5",
+ "suite_sha256": "b0a084d328d70ae301310002134b1b81beba93d1b4617454a2089a07842fe129",
+ "build": {
+  "tar_scenarios_sha256": {
+   "real_evidence": "3cc13020d35aaf7113fe16878e8eb63c11652863fd73c0da3974fc7fa09f2760",
+   "real_evidence_with_manifest": "3cc13020d35aaf7113fe16878e8eb63c11652863fd73c0da3974fc7fa09f2760",
+   "manifest_mismatch_after_edit": "a6e6dae184f72763a22412ccb911aa5d9e2df631a5253390f45f1b81bb5fb376",
+   "trailing_zero_equal": "a6e6dae184f72763a22412ccb911aa5d9e2df631a5253390f45f1b81bb5fb376",
+   "x_value_changed": "93ad3b91fc223c2c1bd932cd8fd6b7958ebda6b16d0f7981697c9f4115d88512",
+   "y_value_changed": "e645e4b0360932f7969de33b8b5e4e944440898800cf54522d963bada39503f6",
+   "x_signed_zero": "2273146116b1d279622dbc8f522567fc8328d752aa94fc1f9bfa4a3b2193139e",
+   "y_signed_zero": "25cf22a0f9e7d19bf1f8c73c0f9cfa386b55b8d946f48d57be6d214d72dd4a7f",
+   "missing_frame": "7a28afad9cf2f9f4ffb32ac38ae09bf1d19ade18d0b2b1a1ba128cb9ef01b255",
+   "duplicate_frame": "5d6db290ba87794d1bec89b5f3cb40920654fcaaeec28e32453a477ddaca5a09",
+   "frame_leading_zero": "a2893cca4e903150b37821bffea0ad377332b8c6f63e9ed556c009595c836aca",
+   "frame_superscript": "e8d5aa3b33b1cab2268f34840f86a08cee9a7da194db1b753bf89ef01b2a3cad",
+   "value_arabic_indic_digit": "f20e115544431587245a7685a9ae3207043178f91498fba8fcb7e0555c30e128",
+   "malformed_token": "b5d26e57f28d29c70bfeb73b60d11a3ff81fabdff55315b640f48f614e57f2cd",
+   "nan_token": "85da678b3cf9fe83bdd93086504030b33b00433e25c7418b312226ce18a80906",
+   "inf_token": "089249ead61f08ac9355ae7170d411dbc93d759926efdeeb9775453be25738ff",
+   "wrong_label": "59088ab1798e55bcbf543dbc815a8ce180b965a7b6e72791db014db1b1636e85",
+   "missing_label": "5c6013d4e66f14019a68fdadf27d1f20a1262a05b1b2dbc2952c16e284e4fbba",
+   "wrong_label_index": "9faadf140ebe0839919af3939b294a4a7e527af666116ce0b3b42eee0a552e3d",
+   "second_global_block": "dcad37aaeeef5f1f521d7ed52f4032033c4d5c80771d2a4400d452350c9284df",
+   "global_block_absent": "600b04f80023018ac15bc5529f7977fa090d9e35b57cc642506c9259fb5ce67c",
+   "binaries_not_distinct": "16ea6dd7fa23f6b61ba3cddb1c58ef7dd29d05bacd0f1ea295958a3842664da0",
+   "receipts_consistently_edited": "8f68624819e7e536d5ae7b033f517b29c01d21ae3647acadec55d1ce74ece4d0",
+   "injected_spec_differs": "9587a94b0f9ccd3f35700ce79041b0a1a984d6eba992db420abaa4e0d9bea776",
+   "binary_differs_from_receipt": "ee6f5c85e16175c7bac472d6c262897869c9d44d7362b066a1c4f1cf720c7560",
+   "run_arm_case_cwd_argv_unbound": "81bc2b966eab1b0e2cf837f0ae091fc39bf79b379b348578df1b6ff5d58fc975",
+   "run_argv_option_changed": "ab6a191504435d089027457bf03378189e0529be688e39ee735ae3e95e845eca",
+   "stdout_not_bound": "10956225d8301ad1c6b5ef498801664e049f5a45d55d4116c9e6421fdae27067",
+   "row_rule_absent_overlay": "08385271861e056ec706f0f325e9b618bba600ba60fdd3f614c0058c2afcae70",
+   "mutant_takes_candidate_decision": "3a982aa9796fee518cd813dd073d97224db1408c2c1696f3616c9a6ef80c2d35",
+   "missing_cpu_row": "982638bac589a9b801761628bd2c8002b64f6e50064be24735dfe66ce8d28007",
+   "cuda_artefact_present": "4d9b030b15c98b82ff44ed0cb16dc320f6c2970b590a45aa362cab82f55765d4",
+   "unsafe_member": "6845ff8262a8b5df7ed1ff984fe81a4f01253cd84187a94fcc8a2a811d883007",
+   "mrc_full_pass": "ed6109799610b98f431252e343ecc5828b4c332b75c17024b1eef0587f801c47",
+   "mrc_one_missing_unrun": "738c924e97c78cf123166d9270f69f9b34f3016110fc63c3e168ad050ff33746",
+   "mrc_header_only_all": "f7aa5b17dffb440a21a6824a1f849b4a0b53318278f581b0b304f9136b6853e2",
+   "mrc_truncated": "e3d2ce3ba08ce5e72fb3adc28006578e69cfbd23182cb5a1a7d674df6301baf3",
+   "mrc_oversize": "ffed09d4309c28674e12d57953c4b0962de37d7ebd48880f0f395920eb5639cc",
+   "mrc_wrong_mode": "43be3e266283b76d87d9d96713561f20704df7b21d902a6968a60edab0e76be3",
+   "mrc_wrong_shape": "449fce09ba7da201da7e8afa5c05852721f431eb5ea3f48939feee8c76c8aeb5",
+   "mrc_nonzero_nsymbt": "c8d27254d094715ae9e9708cedbfe43b06e204f44f73ef6d02d528eeffb1b2b2",
+   "mrc_map_word_missing": "bdb71de87fd0ecec80b3f1014da2d69a172d14bc70f3bdee96eb32a965605c0d",
+   "mrc_wrong_payload_where_equal": "3a3c84e876778e939159e7d8cd1d589e7d74ad952f842d31551e325f0e044aef",
+   "mrc_equal_where_flip": "8b837c2d5c6d35a2406551e2fab70b437e512027b81d25968bf732e19497aae5",
+   "mrc_header_bytes_differ_payload_equal": "8995c2a34b16943d28a8e91dc839e8bed06c2bae2a8ce4e816efb4af1a5f3c6e",
+   "dir_full_pass": "directory",
+   "dir_symlink_leaf_mrc": "directory",
+   "dir_symlink_dir_component": "directory",
+   "dir_changed_after_precheck": "directory",
+   "dir_out_inside_scratch": "directory",
+   "dir_noncanonical_root": "directory",
+   "dir_precheck_header_only": "directory",
+   "dir_precheck_star_edited": "directory",
+   "live_pass": "synthetic",
+   "live_stale_index_stat_pass": "synthetic",
+   "live_head_differs": "synthetic",
+   "live_untracked_file": "synthetic",
+   "live_runner_modified": "synthetic",
+   "live_binary_differs_from_receipt": "synthetic",
+   "live_binaries_not_distinct": "synthetic",
+   "live_symlink_component": "synthetic",
+   "live_active_process": "synthetic",
+   "live_proc_root_missing": "synthetic"
+  },
+  "evidence_tar_sha256": "3cc13020d35aaf7113fe16878e8eb63c11652863fd73c0da3974fc7fa09f2760",
+  "mrc_size": 1573888
+ },
+ "results": [
+  {
+   "control": "real_evidence",
+   "exit": 2,
+   "expected_exit": 2,
+   "needles": [],
+   "problems": [],
+   "consumed_sha256": "822e405fe1d5a2da80714accb8b989400103391db7dc750810b3f1966463a737",
+   "control_ok": true
+  },
+  {
+   "control": "real_evidence_with_manifest",
+   "exit": 2,
+   "expected_exit": 2,
+   "needles": [],
+   "problems": [],
+   "consumed_sha256": "822e405fe1d5a2da80714accb8b989400103391db7dc750810b3f1966463a737",
+   "control_ok": true
+  },
+  {
+   "control": "manifest_mismatch_after_edit",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "manifest mismatch"
+   ],
+   "problems": [
+    "manifest mismatch n3-cpu1/ov-cand-cpu/A_x_legacy_false_accept/out/km_local_nonsquare.star"
+   ],
+   "consumed_sha256": "a3e8b36aadaff812a7e6c470dd1b539d000fea70cd7436d1b344f98eca96471b",
+   "control_ok": true
+  },
+  {
+   "control": "trailing_zero_equal",
+   "exit": 2,
+   "expected_exit": 2,
+   "needles": [],
+   "problems": [],
+   "consumed_sha256": "a3e8b36aadaff812a7e6c470dd1b539d000fea70cd7436d1b344f98eca96471b",
+   "control_ok": true
+  },
+  {
+   "control": "x_value_changed",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "CPU pairs not 8"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "0beb64ca9229c68565721601c74922483bbaa5e54ee0118ddf03a5af1d33a712",
+   "control_ok": true
+  },
+  {
+   "control": "y_value_changed",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "CPU pairs not 8"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "6b5fca3203b4116ea7d8675d46f9a5ec5169e5e27e9104975d503b2f64d7766d",
+   "control_ok": true
+  },
+  {
+   "control": "x_signed_zero",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "CPU pairs not 8"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "f2b6031e9eefe769fbc7ced3e2e524ea0aaac917b7550644bd09c4421a462993",
+   "control_ok": true
+  },
+  {
+   "control": "y_signed_zero",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "CPU pairs not 8"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "b42d53af62e4ba55ed1b3e5540021f47db5970e63a39f0a04f2e819b0e28d14e",
+   "control_ok": true
+  },
+  {
+   "control": "missing_frame",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "frame token"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "4f28fb23d00bcca78b84bdf3cb3b956b9dbe87685c56ace6c8bf7cf2e35c5b0e",
+   "control_ok": true
+  },
+  {
+   "control": "duplicate_frame",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "frame token"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "f51e61be487acafb2cf6feeb1027c6c7db7fd8790d11c1663f3027c7b8fef05e",
+   "control_ok": true
+  },
+  {
+   "control": "frame_leading_zero",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "frame token"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "69cf2737045360ed838c930da2fc26a125dc1240ec6c58c4238d210b55a2aa71",
+   "control_ok": true
+  },
+  {
+   "control": "frame_superscript",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "non-ASCII"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "fa0d8fb0e5228705db323b93af7ebfb1388e06a7d494493b0cc0444c4c4b474c",
+   "control_ok": true
+  },
+  {
+   "control": "value_arabic_indic_digit",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "non-ASCII"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "165e4de3582d4e1a7573cac95fa2b83bcc2853b6c6a4f80169c437e984534001",
+   "control_ok": true
+  },
+  {
+   "control": "malformed_token",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "malformed row"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "7040dcce55739237ae343861233e30aac3658b9ed9151d269ae50efedca1c3e8",
+   "control_ok": true
+  },
+  {
+   "control": "nan_token",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "malformed row"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "89c95867ba4c5092863063831a7c93f2a0ea77fb7378235081314497d25f40df",
+   "control_ok": true
+  },
+  {
+   "control": "inf_token",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "malformed row"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "3f18f5589580b03e6d20ef9e16b675bd978d314ffdd042a31bdb59341844928a",
+   "control_ok": true
+  },
+  {
+   "control": "wrong_label",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "schema"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "91844a1d4d28788d32f8fbd6dac8945f4a4389010237fcbadb536686ad8124ed",
+   "control_ok": true
+  },
+  {
+   "control": "missing_label",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "schema"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "9bfe22a09372f31bdaa5a63ab7b8fb92f642919f6bef842290eb18724c7a0103",
+   "control_ok": true
+  },
+  {
+   "control": "wrong_label_index",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "schema"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "fbaf6da478b70f0ba06329699128c58bc953dab46b3f9edf8b593bbbabddac01",
+   "control_ok": true
+  },
+  {
+   "control": "second_global_block",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "2 data_global_shift blocks"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "4ef62ff111da17ef1aae32a85eec5faa7bcb5c43734e16ff1ba98b8cde08c174",
+   "control_ok": true
+  },
+  {
+   "control": "global_block_absent",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "0 data_global_shift blocks"
+   ],
+   "problems": [
+    "CPU pairs not 8 with equal global rows"
+   ],
+   "consumed_sha256": "24919b3f2994e3f8c5fa522a3c38067070ace89239fd1be269b8e3849fa6813f",
+   "control_ok": true
+  },
+  {
+   "control": "binaries_not_distinct",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "not three distinct hashes"
+   ],
+   "problems": [
+    "build receipts not three distinct hashes {'ov-base-cpu': '3ee3c739ae54422c65f50671e9240b970c0d08ac788f29297aa3288757a37425', 'ov-cand-cpu': '789e5e5b8629ecfeae89e0582f9e7e449c33fed787d43cababb03a1b5fdeb405', 'ov-mut-cpu': '789e5e5b8629ecfeae89e0582f9e7e449c33fed787d43cababb03a1b5fdeb405'}",
+    "row parity with the original grader failed"
+   ],
+   "consumed_sha256": "5e4b0e859a6d4b7993104e101ba21de4f0bb38a8783257cd5578fdd7e143ca2e",
+   "control_ok": true
+  },
+  {
+   "control": "receipts_consistently_edited",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "known-observations.json missing or sha256"
+   ],
+   "problems": [
+    "invalid input: n3-cpu1/known-observations.json missing or sha256 != pinned e178e99fa232a785c4758fa25acfae4c43d6266c2609d02570942310fdaabf33"
+   ],
+   "consumed_sha256": "950ecc06fbb90292b3b5207b049a8164857b7a66eb71cfad0c4e0b26187e3f7c",
+   "control_ok": true
+  },
+  {
+   "control": "injected_spec_differs",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "injected spec differs"
+   ],
+   "problems": [
+    "CPU rows not 24 PASS: ['ov-base-cpu/B_x_legacy_false_reject:FAIL']"
+   ],
+   "consumed_sha256": "6197b6dc4d7a4847c7d4036456fdc4e72b858fef25fa3b3532f197f30b032d2e",
+   "control_ok": true
+  },
+  {
+   "control": "binary_differs_from_receipt",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "binary differs from build receipt"
+   ],
+   "problems": [
+    "CPU rows not 24 PASS: ['ov-cand-cpu/F_mild_both_accept:FAIL']",
+    "row parity with the original grader failed"
+   ],
+   "consumed_sha256": "f1ba670f45236e6ec81226d92a9afd56659b4b0f0e761e6395158933dd7b7b8f",
+   "control_ok": true
+  },
+  {
+   "control": "run_arm_case_cwd_argv_unbound",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "RUN arm not bound",
+    "RUN case not bound",
+    "RUN cwd not bound",
+    "RUN argv not bound"
+   ],
+   "problems": [
+    "CPU rows not 24 PASS: ['ov-cand-cpu/F_mild_both_accept:FAIL']"
+   ],
+   "consumed_sha256": "feeeb880816037251ad55a0892c3bea2924b704c1325edcd208900d38164b769",
+   "control_ok": true
+  },
+  {
+   "control": "run_argv_option_changed",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "RUN argv not bound"
+   ],
+   "problems": [
+    "CPU rows not 24 PASS: ['ov-mut-cpu/F_mild_both_accept:FAIL']",
+    "N4 not PASS on the expected kills"
+   ],
+   "consumed_sha256": "124687c5dbc88be6f3307f0dbf419fcb66ab5e674326cd2dc1abfab02834ef77",
+   "control_ok": true
+  },
+  {
+   "control": "stdout_not_bound",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "stdout not bound"
+   ],
+   "problems": [
+    "CPU rows not 24 PASS: ['ov-mut-cpu/B_y_legacy_false_reject:FAIL']",
+    "N4 not PASS on the expected kills"
+   ],
+   "consumed_sha256": "37089e2e2c7f45eceb7b0d4afdbc4f89333c7e11f0f29ce62cf24ab76523c5a4",
+   "control_ok": true
+  },
+  {
+   "control": "row_rule_absent_overlay",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "overlay witness"
+   ],
+   "problems": [
+    "CPU rows not 24 PASS: ['ov-base-cpu/G_large_both_reject:FAIL']",
+    "row parity with the original grader failed"
+   ],
+   "consumed_sha256": "ad4d79ea26b2a695c9310e2effc1403a1f51378429a6d1e3411e659342d91ba1",
+   "control_ok": true
+  },
+  {
+   "control": "mutant_takes_candidate_decision",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "N4 not PASS"
+   ],
+   "problems": [
+    "CPU rows not 24 PASS: ['ov-mut-cpu/A_x_legacy_false_accept:FAIL']",
+    "N4 not PASS on the expected kills",
+    "row parity with the original grader failed"
+   ],
+   "consumed_sha256": "042b70a7c3c00ff4294d5a87808651771af752b1c550bf13f2786638009a2429",
+   "control_ok": true
+  },
+  {
+   "control": "missing_cpu_row",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "CPU rows not 24 PASS"
+   ],
+   "problems": [
+    "CPU rows not 24 PASS: ['ov-cand-cpu/E_xy_nonsquare_near_threshold:UNRUN']",
+    "CPU pairs not 8 with equal global rows",
+    "row parity with the original grader failed"
+   ],
+   "consumed_sha256": "9931abc76d46b036c20e0ee44452a1f734892d289a244a7b8cff3780e43bd62c",
+   "control_ok": true
+  },
+  {
+   "control": "cuda_artefact_present",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "CUDA rows are not exactly 16 UNRUN"
+   ],
+   "problems": [
+    "CUDA rows are not exactly 16 UNRUN with no artefact"
+   ],
+   "consumed_sha256": "7d87b12548aa692d4d24e13540b3c52b3761432b426bc5f1058fa5541324cfb1",
+   "control_ok": true
+  },
+  {
+   "control": "unsafe_member",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "unsafe member"
+   ],
+   "problems": [
+    "invalid input: unsafe member ../escape"
+   ],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "mrc_full_pass",
+   "exit": 0,
+   "expected_exit": 0,
+   "needles": [],
+   "problems": [],
+   "consumed_sha256": "a12c8b9d844f94877b313b4951f9e368677e20db70d4ce83a0d6189b05a1fd33",
+   "control_ok": true
+  },
+  {
+   "control": "mrc_one_missing_unrun",
+   "exit": 2,
+   "expected_exit": 2,
+   "needles": [],
+   "problems": [],
+   "consumed_sha256": "b4de8244e3594a7781c5ad312ecb647067869c3663a249c3afa17e2ac46ce0d1",
+   "control_ok": true
+  },
+  {
+   "control": "mrc_header_only_all",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "MRC size 1024"
+   ],
+   "problems": [
+    "image relation failed: ['A_x_legacy_false_accept', 'B_x_legacy_false_reject', 'A_y_legacy_false_accept', 'B_y_legacy_false_reject', 'E_xy_nonsquare_near_threshold', 'F_mild_both_accept', 'G_large_both_reject', 'Z_no_overlay']"
+   ],
+   "consumed_sha256": "cf8ed6da7d2d14eb3b133c9431ada7aba28d0c111d46e7d178421e8aaf2da5ac",
+   "control_ok": true
+  },
+  {
+   "control": "mrc_truncated",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "MRC size 1573884"
+   ],
+   "problems": [
+    "image relation failed: ['F_mild_both_accept']"
+   ],
+   "consumed_sha256": "52a67b1a8dd3249e095a539086d12289caf12378e312eea34a80d741c92f3730",
+   "control_ok": true
+  },
+  {
+   "control": "mrc_oversize",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "MRC size 1573889"
+   ],
+   "problems": [
+    "image relation failed: ['F_mild_both_accept']"
+   ],
+   "consumed_sha256": "3e1a4b3f50a2c2f0c901ae86cc6b6264ba9f56564556613c9484d3de6369c00b",
+   "control_ok": true
+  },
+  {
+   "control": "mrc_wrong_mode",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "MRC descriptor"
+   ],
+   "problems": [
+    "image relation failed: ['F_mild_both_accept']"
+   ],
+   "consumed_sha256": "d4d3f341eb7271bd0dd225ee7dc0283c232b4e94a67853971267527b90e8632f",
+   "control_ok": true
+  },
+  {
+   "control": "mrc_wrong_shape",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "MRC descriptor"
+   ],
+   "problems": [
+    "image relation failed: ['F_mild_both_accept']"
+   ],
+   "consumed_sha256": "f44294f952388fa001e76ead0633b2095f3e8fc3959627e06c58635c456508fc",
+   "control_ok": true
+  },
+  {
+   "control": "mrc_nonzero_nsymbt",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "MRC size"
+   ],
+   "problems": [
+    "image relation failed: ['F_mild_both_accept']"
+   ],
+   "consumed_sha256": "2761bd42b3370abe6e49362c528ffb9e2bd6823b32b0adaa7bca254726d387f0",
+   "control_ok": true
+  },
+  {
+   "control": "mrc_map_word_missing",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "map word"
+   ],
+   "problems": [
+    "image relation failed: ['F_mild_both_accept']"
+   ],
+   "consumed_sha256": "7980acaf6c5d657b576dd9b355620140254ee111cd1f3feb4294afba59242aae",
+   "control_ok": true
+  },
+  {
+   "control": "mrc_wrong_payload_where_equal",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "image relation failed",
+    "contradicts original evidence"
+   ],
+   "problems": [
+    "image relation failed: ['F_mild_both_accept']",
+    "recomputed image relation contradicts original evidence; stop"
+   ],
+   "consumed_sha256": "4d656dad57c90cd1709bef7e907e0fc53ac45caf7e58276a5265cc90a1fa8dc9",
+   "control_ok": true
+  },
+  {
+   "control": "mrc_equal_where_flip",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "image relation failed",
+    "contradicts original evidence"
+   ],
+   "problems": [
+    "image relation failed: ['A_x_legacy_false_accept']",
+    "recomputed image relation contradicts original evidence; stop"
+   ],
+   "consumed_sha256": "b2625aad1b46831f5fe72353f2ab7b8b02f8377fcf74c795df5e8c6f54cdf9f7",
+   "control_ok": true
+  },
+  {
+   "control": "mrc_header_bytes_differ_payload_equal",
+   "exit": 0,
+   "expected_exit": 0,
+   "needles": [],
+   "problems": [],
+   "consumed_sha256": "d53d1b154961049eb9f01628fa1dbeff2ea07357b04a095a24f314b8e7961795",
+   "control_ok": true
+  },
+  {
+   "control": "dir_full_pass:precheck",
+   "exit": 0,
+   "expected_exit": 0,
+   "needles": [],
+   "problems": [],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "dir_full_pass",
+   "exit": 0,
+   "expected_exit": 0,
+   "needles": [],
+   "problems": [],
+   "consumed_sha256": "a12c8b9d844f94877b313b4951f9e368677e20db70d4ce83a0d6189b05a1fd33",
+   "control_ok": true
+  },
+  {
+   "control": "dir_symlink_leaf_mrc",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "symlink leaf"
+   ],
+   "problems": [
+    "invalid input: symlink leaf n3-cpu1/ov-cand-cpu/F_mild_both_accept/out/km_local_nonsquare.mrc"
+   ],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "dir_symlink_dir_component",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "symlink or non-directory component"
+   ],
+   "problems": [
+    "invalid input: symlink or non-directory component in n3-cpu1/ov-cand-cpu/F_mild_both_accept/out/km_local_nonsquare.star"
+   ],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "dir_changed_after_precheck",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "changed after precheck"
+   ],
+   "problems": [
+    "image relation failed: ['F_mild_both_accept']",
+    "recomputed image relation contradicts original evidence; stop",
+    "changed after precheck n3-cpu1/ov-cand-cpu/F_mild_both_accept/out/km_local_nonsquare.mrc"
+   ],
+   "consumed_sha256": "97b8b50614b44da1901188d3f6358eb59e6341c427e8fab6650357c71dcfeaa5",
+   "control_ok": true
+  },
+  {
+   "control": "dir_out_inside_scratch",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "output inside the scratch root"
+   ],
+   "stderr": "refused: ['invalid input: output inside the scratch root']",
+   "control_ok": true
+  },
+  {
+   "control": "dir_noncanonical_root",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "non-canonical path"
+   ],
+   "stderr": "refused: ['invalid input: non-canonical path (symlink component): /private/tmp/mc264-v2-1-suite-01/inputs/dir_noncanonical_root/scratch-link']",
+   "control_ok": true
+  },
+  {
+   "control": "dir_precheck_header_only",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "MRC size 1024"
+   ],
+   "problems": [
+    "n3-cpu1/ov-base-cpu/A_x_legacy_false_accept/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-cand-cpu/A_x_legacy_false_accept/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-base-cpu/A_y_legacy_false_accept/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-cand-cpu/A_y_legacy_false_accept/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-base-cpu/B_x_legacy_false_reject/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-cand-cpu/B_x_legacy_false_reject/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-base-cpu/B_y_legacy_false_reject/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-cand-cpu/B_y_legacy_false_reject/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-base-cpu/E_xy_nonsquare_near_threshold/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-cand-cpu/E_xy_nonsquare_near_threshold/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-base-cpu/F_mild_both_accept/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-cand-cpu/F_mild_both_accept/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-base-cpu/G_large_both_reject/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-cand-cpu/G_large_both_reject/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-base-cpu/Z_no_overlay/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888",
+    "n3-cpu1/ov-cand-cpu/Z_no_overlay/out/km_local_nonsquare.mrc: MRC size 1024 != 1573888"
+   ],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "dir_precheck_star_edited",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "missing or sha256 differs"
+   ],
+   "problems": [
+    "n3-cpu1/ov-cand-cpu/A_x_legacy_false_accept/out/km_local_nonsquare.star missing or sha256 differs"
+   ],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "live_pass",
+   "exit": 0,
+   "expected_exit": 0,
+   "needles": [],
+   "problems": [],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "live_stale_index_stat_pass",
+   "exit": 0,
+   "expected_exit": 0,
+   "needles": [],
+   "problems": [],
+   "consumed_sha256": null,
+   "control_ok": true,
+   "index_unchanged_witness": true
+  },
+  {
+   "control": "live_head_differs",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "src-cand: head"
+   ],
+   "problems": [
+    "src-cand: head 'f9f03cf80498c8ce7fb957a6b233a0361eada4df' != '0000000000000000000000000000000000000000'"
+   ],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "live_untracked_file",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "src-ov-cand: status"
+   ],
+   "problems": [
+    "src-ov-cand: status [' M src/motioncorr_runner.cpp', '?? stray.txt'] != [' M src/motioncorr_runner.cpp']"
+   ],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "live_runner_modified",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "src-ov-base: diff_sha256",
+    "src-ov-base: runner_sha256"
+   ],
+   "problems": [
+    "src-ov-base: diff_sha256 'a87bc2dcc337e6243846848adcecb66b911494df9543696e5477325c4c0e9237' != '74b03ec938f492eb22655201893579e3ad55094c809e5a73c2f9c32e8137b6b0'",
+    "src-ov-base: runner_sha256 '7ae26fcf78ecabd92169426d105f83df32bb30832e9840a0623be147d09857d3' != '099c4677c443d414d5828161141a7ab1ef6f80a80ee571b1df0f9ae2e9bd5350'"
+   ],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "live_binary_differs_from_receipt",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "ov-cand-cpu: live/receipt/expect"
+   ],
+   "problems": [
+    "ov-cand-cpu: live/receipt/expect binary hashes differ"
+   ],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "live_binaries_not_distinct",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "live binaries are not distinct"
+   ],
+   "problems": [
+    "live binaries are not distinct"
+   ],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "live_symlink_component",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "symlink or non-directory component"
+   ],
+   "problems": [
+    "invalid input: symlink or non-directory component in build-ov-base-cpu/motioncorr"
+   ],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "live_active_process",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "active processes refer to the scratch"
+   ],
+   "problems": [
+    "active processes refer to the scratch: [('999999', 'cmdline')]"
+   ],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "live_proc_root_missing",
+   "exit": 1,
+   "expected_exit": 1,
+   "needles": [
+    "proc root missing"
+   ],
+   "problems": [
+    "invalid input: proc root missing: /private/tmp/mc264-v2-1-suite-01/inputs/live_proc_root_missing/proc"
+   ],
+   "consumed_sha256": null,
+   "control_ok": true
+  },
+  {
+   "control": "existing_out_refused",
+   "exit": 1,
+   "control_ok": true
+  }
+ ]
+}

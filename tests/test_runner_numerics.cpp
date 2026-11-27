@@ -1,8 +1,10 @@
 #include "src/motioncorr_runner.h"
+#include "src/local_motion_guard.h"
 #include "src/renderEER.h"
 #include "src/jaz/single_particle/new_ft.h"
 #include "src/fftw.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -535,6 +537,138 @@ int main(int argc, char **argv)
             require(integerToString(INT_MIN, 12) == "-02147483648",
                     "integerToString(INT_MIN, 12) gave " + integerToString(INT_MIN, 12));
             std::cout << "PASS integerToString\n";
+            return 0;
+        }
+
+        if (std::string(argv[1]) == "local_motion_guard_model") {
+            // Issue #264 (review F1/F2): the guard helper on the real
+            // ThirdOrderPolynomialModel. The reference scans every in-image
+            // horizontal/vertical pixel pair at ix/nx-0.5 through the model's
+            // own getShiftAt, so it holds for whatever spatial form the model has.
+            const RFLOAT threshold = 3; // runner MAXIMUM_TOLERANCE, strict >
+            auto model_with = [](std::initializer_list<std::pair<int, RFLOAT>> x,
+                                 std::initializer_list<std::pair<int, RFLOAT>> y) {
+                ThirdOrderPolynomialModel model;
+                model.coeffX.initZeros(18);
+                model.coeffY.initZeros(18);
+                for (const auto &c : x) model.coeffX(c.first) = c.second;
+                for (const auto &c : y) model.coeffY(c.first) = c.second;
+                return model;
+            };
+            auto scan = [&](const ThirdOrderPolynomialModel &model, int nx, int ny,
+                            int n_frames, RFLOAT stop_above) {
+                RFLOAT largest = 0;
+                for (int z = 0; z < n_frames; ++z) {
+                    for (int iy = 0; iy < ny; ++iy) {
+                        for (int ix = 0; ix < nx; ++ix) {
+                            const RFLOAT x = (RFLOAT)ix / nx - 0.5, y = (RFLOAT)iy / ny - 0.5;
+                            RFLOAT sx, sy, tx, ty;
+                            model.getShiftAt(z, x, y, sx, sy);
+                            if (ix + 1 < nx) {
+                                model.getShiftAt(z, (RFLOAT)(ix + 1) / nx - 0.5, y, tx, ty);
+                                largest = std::max({largest, std::abs(tx - sx), std::abs(ty - sy)});
+                            }
+                            if (iy + 1 < ny) {
+                                model.getShiftAt(z, x, (RFLOAT)(iy + 1) / ny - 0.5, tx, ty);
+                                largest = std::max({largest, std::abs(tx - sx), std::abs(ty - sy)});
+                            }
+                        }
+                    }
+                    if (largest > stop_above) break;
+                }
+                return largest;
+            };
+            int checks = 0, failed = 0;
+            auto check = [&](bool ok, const std::string &name) {
+                ++checks;
+                if (!ok) { ++failed; std::cerr << "FAIL " << name << '\n'; }
+            };
+            // Frozen decisions from the independent rational pixel-pair oracle
+            // (coefficient k*3+3.. at z=1; frame 0 is identically zero).
+            struct Witness { const char *name; ThirdOrderPolynomialModel model; int nx, ny, frames;
+                             RFLOAT expected; bool reject; };
+            const std::vector<Witness> witnesses = {
+                {"X along x, legacy accepted harmful", model_with({{3, 200}, {6, -200}}, {}), 100, 80, 2, 3.98, true},
+                {"X along x, legacy rejected valid", model_with({{3, 100}, {6, 200}}, {}), 100, 80, 2, 2.94, false},
+                {"Y along y, legacy accepted harmful", model_with({}, {{9, 200}, {12, -200}}), 80, 100, 2, 3.98, true},
+                {"Y along y, legacy rejected valid", model_with({}, {{9, 100}, {12, 200}}), 80, 100, 2, 2.94, false},
+                {"Y along x, legacy accepted harmful", model_with({}, {{3, 200}, {6, -200}}), 100, 80, 2, 3.98, true},
+                {"X along y, legacy rejected valid", model_with({{9, 100}, {12, 200}}, {}), 80, 100, 2, 2.94, false},
+                // Exact in binary: 768*(1/128)*max|y|, max|y| = 0.5.
+                {"cross term exactly at threshold", model_with({{15, 768}}, {}), 128, 128, 2, 3, false},
+                {"cross term above threshold", model_with({{15, 769}}, {}), 128, 128, 2, 769.0 / 256, true},
+                // F1: frame 1 is exactly 3 px, frame 2 is 6 px. A >= early exit
+                // would stop at frame 1 and return 3 (accept).
+                {"strict exit: exact frame then larger frame", model_with({{3, 384}}, {}), 128, 64, 3, 6, true},
+                // Frames 1 and 2 are exactly 3 px, frame 3 is 0: accepted.
+                {"strict exit: exact frames only", model_with({{3, 576}, {4, -192}}, {}), 128, 64, 4, 3, false},
+                {"strict exit: exact frame then larger, Y along y", model_with({}, {{9, 192}}), 48, 64, 3, 6, true},
+            };
+            for (const auto &w : witnesses) {
+                const RFLOAT got = motioncorr::maximumNeighbourShiftDelta<RFLOAT>(
+                    w.model, w.nx, w.ny, w.frames, threshold);
+                const RFLOAT ref = scan(w.model, w.nx, w.ny, w.frames, threshold);
+                check(std::abs(got - w.expected) < 1e-12 && std::abs(ref - w.expected) < 1e-12,
+                      std::string(w.name) + " maximum");
+                check((got > threshold) == w.reject, std::string(w.name) + " decision");
+            }
+            // Deterministic coefficients on all 36 terms, scaled so many cases
+            // straddle the threshold; nonsquare and singleton shapes.
+            unsigned state = 264;
+            auto next = [&]() { state = state * 1103515245u + 12345u; return ((state >> 8) & 0xffff) / 32768.0 - 1; };
+            int straddle_reject = 0, straddle_accept = 0;
+            for (const auto &shape : {std::array<int, 2>{1, 1}, {1, 7}, {7, 1}, {2, 2}, {13, 9}, {64, 48}, {100, 80}}) {
+                for (int frames = 1; frames <= 6; ++frames) {
+                    for (int repeat = 0; repeat < 6; ++repeat) {
+                        ThirdOrderPolynomialModel model = model_with({}, {});
+                        const RFLOAT scale = std::ldexp(1.0, repeat); // 1..32
+                        for (int i = 0; i < 18; ++i) {
+                            model.coeffX(i) = scale * next() / (1 + i / 3);
+                            model.coeffY(i) = scale * next() / (1 + i / 3);
+                        }
+                        const std::string name = std::to_string(shape[0]) + "x" + std::to_string(shape[1]) +
+                                                 " frames " + std::to_string(frames) + " case " + std::to_string(repeat);
+                        const RFLOAT all = motioncorr::maximumNeighbourShiftDelta<RFLOAT>(
+                            model, shape[0], shape[1], frames, std::numeric_limits<RFLOAT>::infinity());
+                        const RFLOAT all_ref = scan(model, shape[0], shape[1], frames, std::numeric_limits<RFLOAT>::infinity());
+                        check(std::abs(all - all_ref) <= 1e-12 * std::max<RFLOAT>(1, all_ref), name + " full maximum");
+                        const RFLOAT got = motioncorr::maximumNeighbourShiftDelta<RFLOAT>(model, shape[0], shape[1], frames, threshold);
+                        const RFLOAT ref = scan(model, shape[0], shape[1], frames, threshold);
+                        check(std::abs(got - ref) <= 1e-12 * std::max<RFLOAT>(1, ref), name + " early-exit value");
+                        check((got > threshold) == (ref > threshold), name + " decision");
+                        if (ref > threshold) ++straddle_reject; else if (all_ref > 0) ++straddle_accept;
+                    }
+                }
+            }
+            // Both decisions must occur, or the sweep cannot see a threshold error.
+            check(straddle_reject > 20 && straddle_accept > 20, "sweep exercises both decisions");
+            std::cout << (failed ? "FAIL" : "PASS") << " checks=" << checks << " failed=" << failed
+                      << " reject=" << straddle_reject << " accept=" << straddle_accept << '\n';
+            return failed ? 1 : 0;
+        }
+        if (std::string(argv[1]) == "local_motion_guard_call") {
+            // Issue #264 (review F2): pin the single production call and its
+            // strict decision. This is a source-text control for argument order,
+            // threshold and comparison; it does not prove nx/ny/n_frames carry the
+            // alignment-grid meaning, which only a runner execution can show.
+            require(argc == 3, "Usage: runner_numerics local_motion_guard_call <motioncorr_runner.cpp>");
+            std::ifstream in(argv[2]);
+            require(in.good(), std::string("Cannot read ") + argv[2]);
+            std::string text, word;
+            while (in >> word) text += word + ' ';
+            auto count = [&](const std::string &needle) {
+                size_t n = 0;
+                for (size_t at = text.find(needle); at != std::string::npos; at = text.find(needle, at + 1)) ++n;
+                return n;
+            };
+            const std::string block =
+                "const RFLOAT MAXIMUM_TOLERANCE = 3; // px "
+                "const RFLOAT largest_delta = motioncorr::maximumNeighbourShiftDelta<RFLOAT>( "
+                "*model, nx, ny, n_frames, MAXIMUM_TOLERANCE); "
+                "if (largest_delta > MAXIMUM_TOLERANCE) { ";
+            require(count("maximumNeighbourShiftDelta") == 1, "Expected exactly one guard helper call");
+            require(count(block) == 1, "Guard call, threshold or strict comparison changed");
+            std::cout << "PASS single guard call with unchanged arguments and strict threshold\n";
             return 0;
         }
 

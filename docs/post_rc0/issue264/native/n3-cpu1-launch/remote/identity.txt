@@ -1,0 +1,19 @@
+utc=2026-10-22T22:54:19Z
+setsid_pid=3315461 wrapper_pid=3315461 chain_pid=3315463
+    PID    PPID     SID    PGID   UID USER                      STARTED STAT COMMAND
+3315461       1 3315461 3315461  1004 alex     Thu Oct 22 22:54:09 2026 Ss   bash -c echo $$ > /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1/launch-cpu1/wrapper.pid; G_SCR=/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1 G_
+3315463 3315461 3315461 3315461  1004 alex     Thu Oct 22 22:54:09 2026 S    bash /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1/src-cand/docs/post_rc0/issue264/native/n3-cpu1/chain_cpu1.sh
+argv[3315461]=bash -c echo $$ > /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1/launch-cpu1/wrapper.pid; G_SCR=/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1 G_SHA=3751bd05a95412dff468557141f2e7e01ad21831 taskset -c 14-15 bash /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1/src-cand/docs/post_rc0/issue264/native/n3-cpu1/chain_cpu1.sh > /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1/launch-cpu1/chain.out 2>&1; echo $? > /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1/launch-cpu1/chain.exit; date -u +%FT%TZ > /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1/launch-cpu1/chain.finished 
+pid 3315461's current affinity list: 0-123
+argv[3315463]=bash /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1/src-cand/docs/post_rc0/issue264/native/n3-cpu1/chain_cpu1.sh 
+pid 3315463's current affinity list: 14,15
+children:
+    PID    PPID PSR COMMAND
+3315540 3315463  15 /bin/bash /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1/src-cand/docs/post_rc0/issue264/native/tools/stage.sh cpu1-b-ov-base-cpu env CFG=cpu /mnt/clathrin/alex-
+locks:
+/tmp/motioncorr-guard264-cpu14-15.lock: /tmp/motioncorr-guard264-cpu14-15.lock: 3315463 3315540 3315549 3315792 3315793 3315798 3315804 3315808 3315879 3315880 3315893 3315894
+/tmp/motioncorr-build.lock: /tmp/motioncorr-build.lock: 3315549 3315792 3315793 3315798 3315804 3315808 3315879 3315880 3315893 3315894
+CHAIN:
+chain-cpu1 3315463 start 2026-10-22T22:54:09Z sha=3751bd05a95412dff468557141f2e7e01ad21831
+cpu1-occupancy-start rc=0 2026-10-22T22:54:13Z
+cpu1-sources rc=0 2026-10-22T22:54:13Z

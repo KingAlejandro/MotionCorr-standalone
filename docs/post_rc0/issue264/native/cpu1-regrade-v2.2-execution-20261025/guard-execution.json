@@ -1,0 +1,98 @@
+{
+  "utc": "2026-10-25T17:48:33.207954+00:00",
+  "namespace": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767",
+  "source_commit": "593c9e2cc53663655a1628ab7500fadddee5d261",
+  "package_sha256": "e57532004e0cd3e9095c2d7bfce688ec518a3a058f17a61678417e251899ae75",
+  "manifest_sha256": "73b820401d0c67b537c352f9a287243f14e9f89e7d01ecb355d83ec298104abe",
+  "authority": "25 October explicit user VM authority; parent selected read-only guard grade after existing-results inventory; direct route overrides obsolete gateway; CPU13 serial; no native MotionCorr",
+  "steps": [
+    {
+      "name": "fresh-admission",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "4GPUs",
+        "python3 -"
+      ],
+      "stdin": "import os,pathlib,subprocess,json,time,fcntl\nlocks=['/tmp/motioncorr-dc-eval-cpu13.lock','/tmp/motioncorr-w4-cpu13.lock','/tmp/motioncorr-guard264-cpu13-regrade.lock']\nfds=[]\nfor n in locks:\n f=os.open(n,os.O_RDWR|os.O_CREAT|os.O_NOFOLLOW,0o600);fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB);fds.append(f)\ndef cpu():\n v=list(map(int,next(l for l in pathlib.Path('/proc/stat').read_text().splitlines() if l.startswith('cpu13 ')).split()[1:]))[:8];return sum(v),v[3]+v[4]\na=cpu();time.sleep(3);b=cpu();busy=1-(b[1]-a[1])/(b[0]-a[0]);assert busy<=0.5,busy\nm=dict((l.split(':')[0],l.split(':')[1].strip()) for l in pathlib.Path('/proc/meminfo').read_text().splitlines());assert int(m['MemAvailable'].split()[0])>262144\ns=os.statvfs('/mnt/clathrin');assert s.f_bavail*s.f_frsize>100<<20\nprint(json.dumps({'cpu13_busy_fraction':busy,'mem_available':m['MemAvailable'],'scratch_free_bytes':s.f_bavail*s.f_frsize,'locks_probed_free':locks,'parent_allocation':'CPU13 one thread;256MiB reserved;20MiB output cap;180s timeout;not benchmark'}))\n",
+      "exit": 0,
+      "wall_s": 4.196038246154785,
+      "stdout": "{\"cpu13_busy_fraction\": 0.0, \"mem_available\": \"442029704 kB\", \"scratch_free_bytes\": 377203101696, \"locks_probed_free\": [\"/tmp/motioncorr-dc-eval-cpu13.lock\", \"/tmp/motioncorr-w4-cpu13.lock\", \"/tmp/motioncorr-guard264-cpu13-regrade.lock\"], \"parent_allocation\": \"CPU13 one thread;256MiB reserved;20MiB output cap;180s timeout;not benchmark\"}\n",
+      "stderr": ""
+    },
+    {
+      "name": "reserve-new-namespace",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "4GPUs",
+        "mkdir -m 700 /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767"
+      ],
+      "stdin": null,
+      "exit": 0,
+      "wall_s": 0.5040371417999268,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "transfer-reviewed-package",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-d9b98408/docs/post_rc0/issue264/native/n3-cpu1-regrade-v2/parent-package-v2.2/attempt2-package.tar",
+        "4GPUs:/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/package.tar"
+      ],
+      "stdin": null,
+      "exit": 0,
+      "wall_s": 0.9595489501953125,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "verify-before-extraction",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "4GPUs",
+        "python3 - /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767 e57532004e0cd3e9095c2d7bfce688ec518a3a058f17a61678417e251899ae75"
+      ],
+      "stdin": "import pathlib,hashlib,tarfile,sys\np=pathlib.Path(sys.argv[1]);b=(p/'package.tar').read_bytes();assert hashlib.sha256(b).hexdigest()==sys.argv[2]\nwith tarfile.open(p/'package.tar') as t:\n m=t.getmembers();assert len(m)==10;assert all(x.isfile() and pathlib.PurePosixPath(x.name).name==x.name and x.size<=1048576 for x in m)\n assert sum(x.size for x in m)<=1048576\n (p/'package').mkdir();t.extractall(p/'package',members=m,filter='data')\nprint('package exact;10 bounded regular basenames extracted')\n",
+      "exit": 0,
+      "wall_s": 0.5871098041534424,
+      "stdout": "package exact;10 bounded regular basenames extracted\n",
+      "stderr": ""
+    },
+    {
+      "name": "reviewed-regrade-once",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "4GPUs",
+        "cd /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767 && date -u +%FT%TZ > parent.started && (exec /usr/bin/timeout --signal=TERM --kill-after=5s 180s /usr/bin/taskset -c 13 /usr/bin/env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -B /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/package/remote_run_v2_2.py --source-commit 593c9e2cc53663655a1628ab7500fadddee5d261 --package-manifest-sha256 73b820401d0c67b537c352f9a287243f14e9f89e7d01ecb355d83ec298104abe --out /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run) > parent.stdout 2> parent.stderr; rc=$?; echo \"$rc\" > /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/parent.exit; date -u +%FT%TZ > /mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/parent.finished; exit \"$rc\""
+      ],
+      "stdin": null,
+      "exit": 0,
+      "wall_s": 9.382178783416748,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "state": "DRIVER_EXIT0_NOT_YET_INTERPRETED",
+  "finish_utc": "2026-10-25T17:48:48.854390+00:00"
+}

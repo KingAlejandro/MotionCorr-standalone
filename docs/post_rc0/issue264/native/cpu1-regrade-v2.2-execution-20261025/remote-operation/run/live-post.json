@@ -1,0 +1,624 @@
+{
+ "kind": "cpu1 regrade v2.2 precheck-live (private index, fixed Git options)",
+ "grader_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849",
+ "amendment_sha256": "74d46b46dfb1a74705f58510696c92802a8a321dc5a59baef2b45b0060681a88",
+ "python": "3.12.3",
+ "problems": [],
+ "scratch_root": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1",
+ "expect_sha256": "e12a2199011d9a1485b699e7e449dd6b02a63f8772a37da3f955ef68514a4359",
+ "trees": {
+  "src-cand": {
+   "git_calls": [
+    {
+     "args": [
+      "rev-parse",
+      "HEAD"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98339324,
+       1023561,
+       1792709050510832771,
+       1792709050510832771
+      ],
+      "sha256": "96a75ae1e0eb21afa5a26a39820c156e2b61870ee5145038e38a677e8cf9e0d4"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98339324,
+       1023561,
+       1792709050510832771,
+       1792709050510832771
+      ],
+      "sha256": "96a75ae1e0eb21afa5a26a39820c156e2b61870ee5145038e38a677e8cf9e0d4"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-v38_a2xa/index",
+     "private_sha256": "96a75ae1e0eb21afa5a26a39820c156e2b61870ee5145038e38a677e8cf9e0d4"
+    },
+    {
+     "args": [
+      "diff",
+      "--no-ext-diff",
+      "--no-textconv"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98339324,
+       1023561,
+       1792709050510832771,
+       1792709050510832771
+      ],
+      "sha256": "96a75ae1e0eb21afa5a26a39820c156e2b61870ee5145038e38a677e8cf9e0d4"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98339324,
+       1023561,
+       1792709050510832771,
+       1792709050510832771
+      ],
+      "sha256": "96a75ae1e0eb21afa5a26a39820c156e2b61870ee5145038e38a677e8cf9e0d4"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-v38_a2xa/index",
+     "private_sha256": "96a75ae1e0eb21afa5a26a39820c156e2b61870ee5145038e38a677e8cf9e0d4"
+    },
+    {
+     "args": [
+      "status",
+      "--porcelain"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98339324,
+       1023561,
+       1792709050510832771,
+       1792709050510832771
+      ],
+      "sha256": "96a75ae1e0eb21afa5a26a39820c156e2b61870ee5145038e38a677e8cf9e0d4"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98339324,
+       1023561,
+       1792709050510832771,
+       1792709050510832771
+      ],
+      "sha256": "96a75ae1e0eb21afa5a26a39820c156e2b61870ee5145038e38a677e8cf9e0d4"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-v38_a2xa/index",
+     "private_sha256": "96a75ae1e0eb21afa5a26a39820c156e2b61870ee5145038e38a677e8cf9e0d4"
+    }
+   ],
+   "index_before": {
+    "stat": [
+     2064,
+     98339324,
+     1023561,
+     1792709050510832771,
+     1792709050510832771
+    ],
+    "sha256": "96a75ae1e0eb21afa5a26a39820c156e2b61870ee5145038e38a677e8cf9e0d4"
+   },
+   "head": "3751bd05a95412dff468557141f2e7e01ad21831",
+   "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "status": [],
+   "runner_sha256": "439041e3ece1dadfb1af06f2b00f804fabe4b0f5ec564572113491b14aa1280b",
+   "helper_sha256": "02d8f5c1c45d2f2e9637b44e6be67089e8abff0f863c761fc29294168f44c146",
+   "index_after": {
+    "stat": [
+     2064,
+     98339324,
+     1023561,
+     1792709050510832771,
+     1792709050510832771
+    ],
+    "sha256": "96a75ae1e0eb21afa5a26a39820c156e2b61870ee5145038e38a677e8cf9e0d4"
+   },
+   "index_unchanged": true
+  },
+  "src-base": {
+   "git_calls": [
+    {
+     "args": [
+      "rev-parse",
+      "HEAD"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98312588,
+       1007660,
+       1792709050950888412,
+       1792709050950888412
+      ],
+      "sha256": "b7812023c2042be96b1e1a0695cfb435df3a06c266ec6bb0e8bf5a6b44a24650"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98312588,
+       1007660,
+       1792709050950888412,
+       1792709050950888412
+      ],
+      "sha256": "b7812023c2042be96b1e1a0695cfb435df3a06c266ec6bb0e8bf5a6b44a24650"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-4iiqwfzg/index",
+     "private_sha256": "b7812023c2042be96b1e1a0695cfb435df3a06c266ec6bb0e8bf5a6b44a24650"
+    },
+    {
+     "args": [
+      "diff",
+      "--no-ext-diff",
+      "--no-textconv"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98312588,
+       1007660,
+       1792709050950888412,
+       1792709050950888412
+      ],
+      "sha256": "b7812023c2042be96b1e1a0695cfb435df3a06c266ec6bb0e8bf5a6b44a24650"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98312588,
+       1007660,
+       1792709050950888412,
+       1792709050950888412
+      ],
+      "sha256": "b7812023c2042be96b1e1a0695cfb435df3a06c266ec6bb0e8bf5a6b44a24650"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-4iiqwfzg/index",
+     "private_sha256": "b7812023c2042be96b1e1a0695cfb435df3a06c266ec6bb0e8bf5a6b44a24650"
+    },
+    {
+     "args": [
+      "status",
+      "--porcelain"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98312588,
+       1007660,
+       1792709050950888412,
+       1792709050950888412
+      ],
+      "sha256": "b7812023c2042be96b1e1a0695cfb435df3a06c266ec6bb0e8bf5a6b44a24650"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98312588,
+       1007660,
+       1792709050950888412,
+       1792709050950888412
+      ],
+      "sha256": "b7812023c2042be96b1e1a0695cfb435df3a06c266ec6bb0e8bf5a6b44a24650"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-4iiqwfzg/index",
+     "private_sha256": "b7812023c2042be96b1e1a0695cfb435df3a06c266ec6bb0e8bf5a6b44a24650"
+    }
+   ],
+   "index_before": {
+    "stat": [
+     2064,
+     98312588,
+     1007660,
+     1792709050950888412,
+     1792709050950888412
+    ],
+    "sha256": "b7812023c2042be96b1e1a0695cfb435df3a06c266ec6bb0e8bf5a6b44a24650"
+   },
+   "head": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+   "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "status": [],
+   "runner_sha256": "8a3a1ad80edebc6959abbb80d118a0a358f703ff5041a0ade4995cbc2307d903",
+   "helper_sha256": "absent",
+   "index_after": {
+    "stat": [
+     2064,
+     98312588,
+     1007660,
+     1792709050950888412,
+     1792709050950888412
+    ],
+    "sha256": "b7812023c2042be96b1e1a0695cfb435df3a06c266ec6bb0e8bf5a6b44a24650"
+   },
+   "index_unchanged": true
+  },
+  "src-ov-base": {
+   "git_calls": [
+    {
+     "args": [
+      "rev-parse",
+      "HEAD"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98321145,
+       1007660,
+       1792709051253926729,
+       1792709051254926855
+      ],
+      "sha256": "c50277551009e0103197651f11b1516f33240d15be982415defd04c2bf6f53b9"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98321145,
+       1007660,
+       1792709051253926729,
+       1792709051254926855
+      ],
+      "sha256": "c50277551009e0103197651f11b1516f33240d15be982415defd04c2bf6f53b9"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-p8xfzvnq/index",
+     "private_sha256": "c50277551009e0103197651f11b1516f33240d15be982415defd04c2bf6f53b9"
+    },
+    {
+     "args": [
+      "diff",
+      "--no-ext-diff",
+      "--no-textconv"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98321145,
+       1007660,
+       1792709051253926729,
+       1792709051254926855
+      ],
+      "sha256": "c50277551009e0103197651f11b1516f33240d15be982415defd04c2bf6f53b9"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98321145,
+       1007660,
+       1792709051253926729,
+       1792709051254926855
+      ],
+      "sha256": "c50277551009e0103197651f11b1516f33240d15be982415defd04c2bf6f53b9"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-p8xfzvnq/index",
+     "private_sha256": "c50277551009e0103197651f11b1516f33240d15be982415defd04c2bf6f53b9"
+    },
+    {
+     "args": [
+      "status",
+      "--porcelain"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98321145,
+       1007660,
+       1792709051253926729,
+       1792709051254926855
+      ],
+      "sha256": "c50277551009e0103197651f11b1516f33240d15be982415defd04c2bf6f53b9"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98321145,
+       1007660,
+       1792709051253926729,
+       1792709051254926855
+      ],
+      "sha256": "c50277551009e0103197651f11b1516f33240d15be982415defd04c2bf6f53b9"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-p8xfzvnq/index",
+     "private_sha256": "c50277551009e0103197651f11b1516f33240d15be982415defd04c2bf6f53b9"
+    }
+   ],
+   "index_before": {
+    "stat": [
+     2064,
+     98321145,
+     1007660,
+     1792709051253926729,
+     1792709051254926855
+    ],
+    "sha256": "c50277551009e0103197651f11b1516f33240d15be982415defd04c2bf6f53b9"
+   },
+   "head": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+   "diff_sha256": "4b01e2607e1ffc86a719ccbf68afbfe5789f2a5b026efe6921eeed62af7d8316",
+   "status": [
+    " M src/motioncorr_runner.cpp"
+   ],
+   "runner_sha256": "70fc2de003eac07b958e0a3acafe0d87674fd9139d69cb1c9bba17aa14dc2ef1",
+   "helper_sha256": "absent",
+   "index_after": {
+    "stat": [
+     2064,
+     98321145,
+     1007660,
+     1792709051253926729,
+     1792709051254926855
+    ],
+    "sha256": "c50277551009e0103197651f11b1516f33240d15be982415defd04c2bf6f53b9"
+   },
+   "index_unchanged": true
+  },
+  "src-ov-cand": {
+   "git_calls": [
+    {
+     "args": [
+      "rev-parse",
+      "HEAD"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98329573,
+       1023561,
+       1792709051436949871,
+       1792709051436949871
+      ],
+      "sha256": "2ae5b06184c3be5edd29cb381675592ede202cbfde198eec66f147bc53a163d6"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98329573,
+       1023561,
+       1792709051436949871,
+       1792709051436949871
+      ],
+      "sha256": "2ae5b06184c3be5edd29cb381675592ede202cbfde198eec66f147bc53a163d6"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-h_20h5ox/index",
+     "private_sha256": "2ae5b06184c3be5edd29cb381675592ede202cbfde198eec66f147bc53a163d6"
+    },
+    {
+     "args": [
+      "diff",
+      "--no-ext-diff",
+      "--no-textconv"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98329573,
+       1023561,
+       1792709051436949871,
+       1792709051436949871
+      ],
+      "sha256": "2ae5b06184c3be5edd29cb381675592ede202cbfde198eec66f147bc53a163d6"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98329573,
+       1023561,
+       1792709051436949871,
+       1792709051436949871
+      ],
+      "sha256": "2ae5b06184c3be5edd29cb381675592ede202cbfde198eec66f147bc53a163d6"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-h_20h5ox/index",
+     "private_sha256": "2ae5b06184c3be5edd29cb381675592ede202cbfde198eec66f147bc53a163d6"
+    },
+    {
+     "args": [
+      "status",
+      "--porcelain"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98329573,
+       1023561,
+       1792709051436949871,
+       1792709051436949871
+      ],
+      "sha256": "2ae5b06184c3be5edd29cb381675592ede202cbfde198eec66f147bc53a163d6"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98329573,
+       1023561,
+       1792709051436949871,
+       1792709051436949871
+      ],
+      "sha256": "2ae5b06184c3be5edd29cb381675592ede202cbfde198eec66f147bc53a163d6"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-h_20h5ox/index",
+     "private_sha256": "2ae5b06184c3be5edd29cb381675592ede202cbfde198eec66f147bc53a163d6"
+    }
+   ],
+   "index_before": {
+    "stat": [
+     2064,
+     98329573,
+     1023561,
+     1792709051436949871,
+     1792709051436949871
+    ],
+    "sha256": "2ae5b06184c3be5edd29cb381675592ede202cbfde198eec66f147bc53a163d6"
+   },
+   "head": "3751bd05a95412dff468557141f2e7e01ad21831",
+   "diff_sha256": "26274cd38b2ab2026ad5fd3ebab8ecd5fce2a6210aa8fef035e78eb6f4aa2de0",
+   "status": [
+    " M src/motioncorr_runner.cpp"
+   ],
+   "runner_sha256": "554237935c6004876583817043e9cae104d1b8169a20ea00079c2c544bf6ed75",
+   "helper_sha256": "02d8f5c1c45d2f2e9637b44e6be67089e8abff0f863c761fc29294168f44c146",
+   "index_after": {
+    "stat": [
+     2064,
+     98329573,
+     1023561,
+     1792709051436949871,
+     1792709051436949871
+    ],
+    "sha256": "2ae5b06184c3be5edd29cb381675592ede202cbfde198eec66f147bc53a163d6"
+   },
+   "index_unchanged": true
+  },
+  "src-ov-mut": {
+   "git_calls": [
+    {
+     "args": [
+      "rev-parse",
+      "HEAD"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98450567,
+       1023561,
+       1792709052346064821,
+       1792709052415073546
+      ],
+      "sha256": "6edf4abee8db73d6c89590a54c95aaec9ad2d97fb30fe77455c3e4e33610f178"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98450567,
+       1023561,
+       1792709052346064821,
+       1792709052415073546
+      ],
+      "sha256": "6edf4abee8db73d6c89590a54c95aaec9ad2d97fb30fe77455c3e4e33610f178"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-ab58jg5i/index",
+     "private_sha256": "6edf4abee8db73d6c89590a54c95aaec9ad2d97fb30fe77455c3e4e33610f178"
+    },
+    {
+     "args": [
+      "diff",
+      "--no-ext-diff",
+      "--no-textconv"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98450567,
+       1023561,
+       1792709052346064821,
+       1792709052415073546
+      ],
+      "sha256": "6edf4abee8db73d6c89590a54c95aaec9ad2d97fb30fe77455c3e4e33610f178"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98450567,
+       1023561,
+       1792709052346064821,
+       1792709052415073546
+      ],
+      "sha256": "6edf4abee8db73d6c89590a54c95aaec9ad2d97fb30fe77455c3e4e33610f178"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-ab58jg5i/index",
+     "private_sha256": "6edf4abee8db73d6c89590a54c95aaec9ad2d97fb30fe77455c3e4e33610f178"
+    },
+    {
+     "args": [
+      "status",
+      "--porcelain"
+     ],
+     "original_before": {
+      "stat": [
+       2064,
+       98450567,
+       1023561,
+       1792709052346064821,
+       1792709052415073546
+      ],
+      "sha256": "6edf4abee8db73d6c89590a54c95aaec9ad2d97fb30fe77455c3e4e33610f178"
+     },
+     "original_after": {
+      "stat": [
+       2064,
+       98450567,
+       1023561,
+       1792709052346064821,
+       1792709052415073546
+      ],
+      "sha256": "6edf4abee8db73d6c89590a54c95aaec9ad2d97fb30fe77455c3e4e33610f178"
+     },
+     "private_index": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/private-index-ab58jg5i/index",
+     "private_sha256": "6edf4abee8db73d6c89590a54c95aaec9ad2d97fb30fe77455c3e4e33610f178"
+    }
+   ],
+   "index_before": {
+    "stat": [
+     2064,
+     98450567,
+     1023561,
+     1792709052346064821,
+     1792709052415073546
+    ],
+    "sha256": "6edf4abee8db73d6c89590a54c95aaec9ad2d97fb30fe77455c3e4e33610f178"
+   },
+   "head": "3751bd05a95412dff468557141f2e7e01ad21831",
+   "diff_sha256": "74b983bccff71b062ca535e057bb1d3e3cad2e9dfb44bb503bfc902304c485b9",
+   "status": [
+    " M src/local_motion_guard.h",
+    " M src/motioncorr_runner.cpp"
+   ],
+   "runner_sha256": "554237935c6004876583817043e9cae104d1b8169a20ea00079c2c544bf6ed75",
+   "helper_sha256": "d531871fa4a34986d375ac3f79053490cd8eb6eb512bb3d642d15955add1e347",
+   "index_after": {
+    "stat": [
+     2064,
+     98450567,
+     1023561,
+     1792709052346064821,
+     1792709052415073546
+    ],
+    "sha256": "6edf4abee8db73d6c89590a54c95aaec9ad2d97fb30fe77455c3e4e33610f178"
+   },
+   "index_unchanged": true
+  }
+ },
+ "binaries": {
+  "ov-base-cpu": {
+   "live": {
+    "size": 2631232,
+    "sha256": "3ee3c739ae54422c65f50671e9240b970c0d08ac788f29297aa3288757a37425"
+   },
+   "receipt": "3ee3c739ae54422c65f50671e9240b970c0d08ac788f29297aa3288757a37425",
+   "expect": "3ee3c739ae54422c65f50671e9240b970c0d08ac788f29297aa3288757a37425"
+  },
+  "ov-cand-cpu": {
+   "live": {
+    "size": 2631344,
+    "sha256": "789e5e5b8629ecfeae89e0582f9e7e449c33fed787d43cababb03a1b5fdeb405"
+   },
+   "receipt": "789e5e5b8629ecfeae89e0582f9e7e449c33fed787d43cababb03a1b5fdeb405",
+   "expect": "789e5e5b8629ecfeae89e0582f9e7e449c33fed787d43cababb03a1b5fdeb405"
+  },
+  "ov-mut-cpu": {
+   "live": {
+    "size": 2631344,
+    "sha256": "7e0b2cab13d5a7336aab42f5ac74729a1548a32a075b4b9ee0d81cff10a2f110"
+   },
+   "receipt": "7e0b2cab13d5a7336aab42f5ac74729a1548a32a075b4b9ee0d81cff10a2f110",
+   "expect": "7e0b2cab13d5a7336aab42f5ac74729a1548a32a075b4b9ee0d81cff10a2f110"
+  }
+ },
+ "processes": {
+  "referring_to_scratch": [],
+  "unreadable": 1645
+ },
+ "verdict": "PASS"
+}

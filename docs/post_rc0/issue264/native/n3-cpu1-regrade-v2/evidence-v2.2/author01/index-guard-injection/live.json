@@ -1,0 +1,118 @@
+{
+ "kind": "cpu1 regrade v2.2 precheck-live (private index, fixed Git options)",
+ "grader_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849",
+ "amendment_sha256": "74d46b46dfb1a74705f58510696c92802a8a321dc5a59baef2b45b0060681a88",
+ "python": "3.13.7",
+ "problems": [
+  "invalid input: src-cand: .git/index changed during the check"
+ ],
+ "scratch_root": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/index-guard-injection/scratch",
+ "expect_sha256": "8914f870827fc742b178c9fe4bedcf4cb89a4fbef0f3e980f68b2e3ac6467d53",
+ "trees": {
+  "src-cand": {
+   "git_calls": [
+    {
+     "args": [
+      "rev-parse",
+      "HEAD"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228216173,
+       269,
+       1792759730192398962,
+       1792759730192580379
+      ],
+      "sha256": "73963051e9add527ae94a8e20b5569039deba1ff95243e976defbad52af5d60b"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228216173,
+       269,
+       1792759730192398962,
+       1792759730192580379
+      ],
+      "sha256": "73963051e9add527ae94a8e20b5569039deba1ff95243e976defbad52af5d60b"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/index-guard-injection/private-index-i00g177p/index",
+     "private_sha256": "73963051e9add527ae94a8e20b5569039deba1ff95243e976defbad52af5d60b"
+    },
+    {
+     "args": [
+      "diff",
+      "--no-ext-diff",
+      "--no-textconv"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228216173,
+       269,
+       1792759730192398962,
+       1792759730192580379
+      ],
+      "sha256": "73963051e9add527ae94a8e20b5569039deba1ff95243e976defbad52af5d60b"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228216173,
+       269,
+       1792759730192398962,
+       1792759730192580379
+      ],
+      "sha256": "73963051e9add527ae94a8e20b5569039deba1ff95243e976defbad52af5d60b"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/index-guard-injection/private-index-i00g177p/index",
+     "private_sha256": "73963051e9add527ae94a8e20b5569039deba1ff95243e976defbad52af5d60b"
+    },
+    {
+     "args": [
+      "status",
+      "--porcelain"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228216173,
+       269,
+       1792759730192398962,
+       1792759730192580379
+      ],
+      "sha256": "73963051e9add527ae94a8e20b5569039deba1ff95243e976defbad52af5d60b"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228216173,
+       269,
+       1792759731192398962,
+       1792759730698691523
+      ],
+      "sha256": "73963051e9add527ae94a8e20b5569039deba1ff95243e976defbad52af5d60b"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/index-guard-injection/private-index-i00g177p/index",
+     "private_sha256": "73963051e9add527ae94a8e20b5569039deba1ff95243e976defbad52af5d60b"
+    }
+   ],
+   "index_before": {
+    "stat": [
+     16777230,
+     228216173,
+     269,
+     1792759730192398962,
+     1792759730192580379
+    ],
+    "sha256": "73963051e9add527ae94a8e20b5569039deba1ff95243e976defbad52af5d60b"
+   }
+  }
+ },
+ "binaries": {},
+ "processes": {
+  "referring_to_scratch": [],
+  "unreadable": 0
+ },
+ "verdict": "FAIL"
+}

@@ -1,0 +1,123 @@
+{
+ "pairs": [
+  {
+   "case": "A_x_legacy_false_accept",
+   "grader_same_global_shifts": false,
+   "numeric_rows_identical": true,
+   "n_rows": 12,
+   "base_model_published": true,
+   "cand_model_published": false,
+   "base_next_block": "local_motion_model",
+   "cand_next_block": "<end of file>",
+   "base_tail": "\n\n",
+   "cand_tail": " \n \n",
+   "explained_by_tail_only": true
+  },
+  {
+   "case": "B_x_legacy_false_reject",
+   "grader_same_global_shifts": false,
+   "numeric_rows_identical": true,
+   "n_rows": 12,
+   "base_model_published": false,
+   "cand_model_published": true,
+   "base_next_block": "<end of file>",
+   "cand_next_block": "local_motion_model",
+   "base_tail": " \n \n",
+   "cand_tail": "\n\n",
+   "explained_by_tail_only": true
+  },
+  {
+   "case": "A_y_legacy_false_accept",
+   "grader_same_global_shifts": false,
+   "numeric_rows_identical": true,
+   "n_rows": 12,
+   "base_model_published": true,
+   "cand_model_published": false,
+   "base_next_block": "local_motion_model",
+   "cand_next_block": "<end of file>",
+   "base_tail": "\n\n",
+   "cand_tail": " \n \n",
+   "explained_by_tail_only": true
+  },
+  {
+   "case": "B_y_legacy_false_reject",
+   "grader_same_global_shifts": false,
+   "numeric_rows_identical": true,
+   "n_rows": 12,
+   "base_model_published": false,
+   "cand_model_published": true,
+   "base_next_block": "<end of file>",
+   "cand_next_block": "local_motion_model",
+   "base_tail": " \n \n",
+   "cand_tail": "\n\n",
+   "explained_by_tail_only": true
+  },
+  {
+   "case": "E_xy_nonsquare_near_threshold",
+   "grader_same_global_shifts": false,
+   "numeric_rows_identical": true,
+   "n_rows": 12,
+   "base_model_published": false,
+   "cand_model_published": true,
+   "base_next_block": "<end of file>",
+   "cand_next_block": "local_motion_model",
+   "base_tail": " \n \n",
+   "cand_tail": "\n\n",
+   "explained_by_tail_only": true
+  },
+  {
+   "case": "F_mild_both_accept",
+   "grader_same_global_shifts": true,
+   "numeric_rows_identical": true,
+   "n_rows": 12,
+   "base_model_published": true,
+   "cand_model_published": true,
+   "base_next_block": "local_motion_model",
+   "cand_next_block": "local_motion_model",
+   "base_tail": "\n\n",
+   "cand_tail": "\n\n",
+   "explained_by_tail_only": true
+  },
+  {
+   "case": "G_large_both_reject",
+   "grader_same_global_shifts": true,
+   "numeric_rows_identical": true,
+   "n_rows": 12,
+   "base_model_published": false,
+   "cand_model_published": false,
+   "base_next_block": "<end of file>",
+   "cand_next_block": "<end of file>",
+   "base_tail": " \n \n",
+   "cand_tail": " \n \n",
+   "explained_by_tail_only": true
+  },
+  {
+   "case": "Z_no_overlay",
+   "grader_same_global_shifts": true,
+   "numeric_rows_identical": true,
+   "n_rows": 12,
+   "base_model_published": true,
+   "cand_model_published": true,
+   "base_next_block": "local_motion_model",
+   "cand_next_block": "local_motion_model",
+   "base_tail": "\n\n",
+   "cand_tail": "\n\n",
+   "explained_by_tail_only": true
+  }
+ ],
+ "arms_all_equal_rows": {
+  "A_x_legacy_false_accept": true,
+  "B_x_legacy_false_reject": true,
+  "A_y_legacy_false_accept": true,
+  "B_y_legacy_false_reject": true,
+  "E_xy_nonsquare_near_threshold": true,
+  "F_mild_both_accept": true,
+  "G_large_both_reject": true,
+  "Z_no_overlay": true
+ },
+ "harm_controls": {
+  "row_compare_detects_1e-6_change": true,
+  "extraction_differs_on_identical_rows_by_following_block": true
+ },
+ "all_pairs_numeric_rows_identical": true
+}

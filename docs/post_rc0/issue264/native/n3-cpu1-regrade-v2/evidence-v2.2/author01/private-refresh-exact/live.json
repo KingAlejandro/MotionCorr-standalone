@@ -1,0 +1,624 @@
+{
+ "kind": "cpu1 regrade v2.2 precheck-live (private index, fixed Git options)",
+ "grader_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849",
+ "amendment_sha256": "74d46b46dfb1a74705f58510696c92802a8a321dc5a59baef2b45b0060681a88",
+ "python": "3.13.7",
+ "problems": [],
+ "scratch_root": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/scratch",
+ "expect_sha256": "8914f870827fc742b178c9fe4bedcf4cb89a4fbef0f3e980f68b2e3ac6467d53",
+ "trees": {
+  "src-cand": {
+   "git_calls": [
+    {
+     "args": [
+      "rev-parse",
+      "HEAD"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215345,
+       269,
+       1792759725087583317,
+       1792759725087839276
+      ],
+      "sha256": "48ab707198cb69d139db7412e14d328bfe5c6ce4d10f5afedc5cc8ac3cc4e993"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215345,
+       269,
+       1792759725087583317,
+       1792759725087839276
+      ],
+      "sha256": "48ab707198cb69d139db7412e14d328bfe5c6ce4d10f5afedc5cc8ac3cc4e993"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-37gjjtl_/index",
+     "private_sha256": "48ab707198cb69d139db7412e14d328bfe5c6ce4d10f5afedc5cc8ac3cc4e993"
+    },
+    {
+     "args": [
+      "diff",
+      "--no-ext-diff",
+      "--no-textconv"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215345,
+       269,
+       1792759725087583317,
+       1792759725087839276
+      ],
+      "sha256": "48ab707198cb69d139db7412e14d328bfe5c6ce4d10f5afedc5cc8ac3cc4e993"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215345,
+       269,
+       1792759725087583317,
+       1792759725087839276
+      ],
+      "sha256": "48ab707198cb69d139db7412e14d328bfe5c6ce4d10f5afedc5cc8ac3cc4e993"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-37gjjtl_/index",
+     "private_sha256": "e62844cd70e9490d397922d54964d42e5d5a40bb4239492d35d76e28a1ff2a5f"
+    },
+    {
+     "args": [
+      "status",
+      "--porcelain"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215345,
+       269,
+       1792759725087583317,
+       1792759725087839276
+      ],
+      "sha256": "48ab707198cb69d139db7412e14d328bfe5c6ce4d10f5afedc5cc8ac3cc4e993"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215345,
+       269,
+       1792759725087583317,
+       1792759725087839276
+      ],
+      "sha256": "48ab707198cb69d139db7412e14d328bfe5c6ce4d10f5afedc5cc8ac3cc4e993"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-37gjjtl_/index",
+     "private_sha256": "e62844cd70e9490d397922d54964d42e5d5a40bb4239492d35d76e28a1ff2a5f"
+    }
+   ],
+   "index_before": {
+    "stat": [
+     16777230,
+     228215345,
+     269,
+     1792759725087583317,
+     1792759725087839276
+    ],
+    "sha256": "48ab707198cb69d139db7412e14d328bfe5c6ce4d10f5afedc5cc8ac3cc4e993"
+   },
+   "head": "f9f03cf80498c8ce7fb957a6b233a0361eada4df",
+   "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "status": [],
+   "runner_sha256": "ad67cd73517a8b16894c37bcdde0f6c888450b0461ed70fa73edc9dab4ee3523",
+   "helper_sha256": "e81d3b0e9d82feaaf5f6e55bdff24731d7eee08632ffa63801e6397290c5d20a",
+   "index_after": {
+    "stat": [
+     16777230,
+     228215345,
+     269,
+     1792759725087583317,
+     1792759725087839276
+    ],
+    "sha256": "48ab707198cb69d139db7412e14d328bfe5c6ce4d10f5afedc5cc8ac3cc4e993"
+   },
+   "index_unchanged": true
+  },
+  "src-base": {
+   "git_calls": [
+    {
+     "args": [
+      "rev-parse",
+      "HEAD"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215097,
+       181,
+       1792759724094929368,
+       1792759724095160577
+      ],
+      "sha256": "19bc4089a22cd37b9859541da212e7e62bb0cf0d7334fa327869c720b28c8d1f"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215097,
+       181,
+       1792759724094929368,
+       1792759724095160577
+      ],
+      "sha256": "19bc4089a22cd37b9859541da212e7e62bb0cf0d7334fa327869c720b28c8d1f"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-ilyhg8p0/index",
+     "private_sha256": "19bc4089a22cd37b9859541da212e7e62bb0cf0d7334fa327869c720b28c8d1f"
+    },
+    {
+     "args": [
+      "diff",
+      "--no-ext-diff",
+      "--no-textconv"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215097,
+       181,
+       1792759724094929368,
+       1792759724095160577
+      ],
+      "sha256": "19bc4089a22cd37b9859541da212e7e62bb0cf0d7334fa327869c720b28c8d1f"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215097,
+       181,
+       1792759724094929368,
+       1792759724095160577
+      ],
+      "sha256": "19bc4089a22cd37b9859541da212e7e62bb0cf0d7334fa327869c720b28c8d1f"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-ilyhg8p0/index",
+     "private_sha256": "19bc4089a22cd37b9859541da212e7e62bb0cf0d7334fa327869c720b28c8d1f"
+    },
+    {
+     "args": [
+      "status",
+      "--porcelain"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215097,
+       181,
+       1792759724094929368,
+       1792759724095160577
+      ],
+      "sha256": "19bc4089a22cd37b9859541da212e7e62bb0cf0d7334fa327869c720b28c8d1f"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215097,
+       181,
+       1792759724094929368,
+       1792759724095160577
+      ],
+      "sha256": "19bc4089a22cd37b9859541da212e7e62bb0cf0d7334fa327869c720b28c8d1f"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-ilyhg8p0/index",
+     "private_sha256": "19bc4089a22cd37b9859541da212e7e62bb0cf0d7334fa327869c720b28c8d1f"
+    }
+   ],
+   "index_before": {
+    "stat": [
+     16777230,
+     228215097,
+     181,
+     1792759724094929368,
+     1792759724095160577
+    ],
+    "sha256": "19bc4089a22cd37b9859541da212e7e62bb0cf0d7334fa327869c720b28c8d1f"
+   },
+   "head": "8336154a0cc362a0b137b21260c8ecd29b5cb26e",
+   "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "status": [],
+   "runner_sha256": "643851326baf4b0828a34fc394165bfd121f465adf9ebad2c500e8eed23e1064",
+   "helper_sha256": "absent",
+   "index_after": {
+    "stat": [
+     16777230,
+     228215097,
+     181,
+     1792759724094929368,
+     1792759724095160577
+    ],
+    "sha256": "19bc4089a22cd37b9859541da212e7e62bb0cf0d7334fa327869c720b28c8d1f"
+   },
+   "index_unchanged": true
+  },
+  "src-ov-base": {
+   "git_calls": [
+    {
+     "args": [
+      "rev-parse",
+      "HEAD"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215347,
+       181,
+       1792759725281281762,
+       1792759725281573304
+      ],
+      "sha256": "6eaafc88a6b356495a51bc71636ccfa0c73ac64570468cffb9a8eed85fe0ff75"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215347,
+       181,
+       1792759725281281762,
+       1792759725281573304
+      ],
+      "sha256": "6eaafc88a6b356495a51bc71636ccfa0c73ac64570468cffb9a8eed85fe0ff75"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-3avgi6nf/index",
+     "private_sha256": "6eaafc88a6b356495a51bc71636ccfa0c73ac64570468cffb9a8eed85fe0ff75"
+    },
+    {
+     "args": [
+      "diff",
+      "--no-ext-diff",
+      "--no-textconv"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215347,
+       181,
+       1792759725281281762,
+       1792759725281573304
+      ],
+      "sha256": "6eaafc88a6b356495a51bc71636ccfa0c73ac64570468cffb9a8eed85fe0ff75"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215347,
+       181,
+       1792759725281281762,
+       1792759725281573304
+      ],
+      "sha256": "6eaafc88a6b356495a51bc71636ccfa0c73ac64570468cffb9a8eed85fe0ff75"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-3avgi6nf/index",
+     "private_sha256": "6eaafc88a6b356495a51bc71636ccfa0c73ac64570468cffb9a8eed85fe0ff75"
+    },
+    {
+     "args": [
+      "status",
+      "--porcelain"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215347,
+       181,
+       1792759725281281762,
+       1792759725281573304
+      ],
+      "sha256": "6eaafc88a6b356495a51bc71636ccfa0c73ac64570468cffb9a8eed85fe0ff75"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215347,
+       181,
+       1792759725281281762,
+       1792759725281573304
+      ],
+      "sha256": "6eaafc88a6b356495a51bc71636ccfa0c73ac64570468cffb9a8eed85fe0ff75"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-3avgi6nf/index",
+     "private_sha256": "6eaafc88a6b356495a51bc71636ccfa0c73ac64570468cffb9a8eed85fe0ff75"
+    }
+   ],
+   "index_before": {
+    "stat": [
+     16777230,
+     228215347,
+     181,
+     1792759725281281762,
+     1792759725281573304
+    ],
+    "sha256": "6eaafc88a6b356495a51bc71636ccfa0c73ac64570468cffb9a8eed85fe0ff75"
+   },
+   "head": "a426e82004dfcdb39c939b38eb66b9e5dfcdcf92",
+   "diff_sha256": "74b03ec938f492eb22655201893579e3ad55094c809e5a73c2f9c32e8137b6b0",
+   "status": [
+    " M src/motioncorr_runner.cpp"
+   ],
+   "runner_sha256": "099c4677c443d414d5828161141a7ab1ef6f80a80ee571b1df0f9ae2e9bd5350",
+   "helper_sha256": "absent",
+   "index_after": {
+    "stat": [
+     16777230,
+     228215347,
+     181,
+     1792759725281281762,
+     1792759725281573304
+    ],
+    "sha256": "6eaafc88a6b356495a51bc71636ccfa0c73ac64570468cffb9a8eed85fe0ff75"
+   },
+   "index_unchanged": true
+  },
+  "src-ov-cand": {
+   "git_calls": [
+    {
+     "args": [
+      "rev-parse",
+      "HEAD"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215348,
+       269,
+       1792759725364182428,
+       1792759725364382304
+      ],
+      "sha256": "2e55f3efa0e05de64616d075c4bba8ed08ed4913872d0c34ed1bf90e52d6932f"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215348,
+       269,
+       1792759725364182428,
+       1792759725364382304
+      ],
+      "sha256": "2e55f3efa0e05de64616d075c4bba8ed08ed4913872d0c34ed1bf90e52d6932f"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-0wqfsbyb/index",
+     "private_sha256": "2e55f3efa0e05de64616d075c4bba8ed08ed4913872d0c34ed1bf90e52d6932f"
+    },
+    {
+     "args": [
+      "diff",
+      "--no-ext-diff",
+      "--no-textconv"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215348,
+       269,
+       1792759725364182428,
+       1792759725364382304
+      ],
+      "sha256": "2e55f3efa0e05de64616d075c4bba8ed08ed4913872d0c34ed1bf90e52d6932f"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215348,
+       269,
+       1792759725364182428,
+       1792759725364382304
+      ],
+      "sha256": "2e55f3efa0e05de64616d075c4bba8ed08ed4913872d0c34ed1bf90e52d6932f"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-0wqfsbyb/index",
+     "private_sha256": "2e55f3efa0e05de64616d075c4bba8ed08ed4913872d0c34ed1bf90e52d6932f"
+    },
+    {
+     "args": [
+      "status",
+      "--porcelain"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215348,
+       269,
+       1792759725364182428,
+       1792759725364382304
+      ],
+      "sha256": "2e55f3efa0e05de64616d075c4bba8ed08ed4913872d0c34ed1bf90e52d6932f"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215348,
+       269,
+       1792759725364182428,
+       1792759725364382304
+      ],
+      "sha256": "2e55f3efa0e05de64616d075c4bba8ed08ed4913872d0c34ed1bf90e52d6932f"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-0wqfsbyb/index",
+     "private_sha256": "2e55f3efa0e05de64616d075c4bba8ed08ed4913872d0c34ed1bf90e52d6932f"
+    }
+   ],
+   "index_before": {
+    "stat": [
+     16777230,
+     228215348,
+     269,
+     1792759725364182428,
+     1792759725364382304
+    ],
+    "sha256": "2e55f3efa0e05de64616d075c4bba8ed08ed4913872d0c34ed1bf90e52d6932f"
+   },
+   "head": "e754c9452e3b6cc59fdd2c164b390613da3812ec",
+   "diff_sha256": "17e31d10d48f24e1bc8734d6e11e339236537e298c5c0d190196352ee8da00c3",
+   "status": [
+    " M src/motioncorr_runner.cpp"
+   ],
+   "runner_sha256": "bd2b5e3189e5dcc49b76f2df04cc2da8ad1c65f1db28cd9bb6da0b9ba0f91f7f",
+   "helper_sha256": "e81d3b0e9d82feaaf5f6e55bdff24731d7eee08632ffa63801e6397290c5d20a",
+   "index_after": {
+    "stat": [
+     16777230,
+     228215348,
+     269,
+     1792759725364182428,
+     1792759725364382304
+    ],
+    "sha256": "2e55f3efa0e05de64616d075c4bba8ed08ed4913872d0c34ed1bf90e52d6932f"
+   },
+   "index_unchanged": true
+  },
+  "src-ov-mut": {
+   "git_calls": [
+    {
+     "args": [
+      "rev-parse",
+      "HEAD"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215349,
+       269,
+       1792759725457193495,
+       1792759725457460288
+      ],
+      "sha256": "cd6b99386af11ec58d1913883e12ec046df9c20c7d5173fc2eed6199fd3dbb9a"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215349,
+       269,
+       1792759725457193495,
+       1792759725457460288
+      ],
+      "sha256": "cd6b99386af11ec58d1913883e12ec046df9c20c7d5173fc2eed6199fd3dbb9a"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-ddk9i788/index",
+     "private_sha256": "cd6b99386af11ec58d1913883e12ec046df9c20c7d5173fc2eed6199fd3dbb9a"
+    },
+    {
+     "args": [
+      "diff",
+      "--no-ext-diff",
+      "--no-textconv"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215349,
+       269,
+       1792759725457193495,
+       1792759725457460288
+      ],
+      "sha256": "cd6b99386af11ec58d1913883e12ec046df9c20c7d5173fc2eed6199fd3dbb9a"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215349,
+       269,
+       1792759725457193495,
+       1792759725457460288
+      ],
+      "sha256": "cd6b99386af11ec58d1913883e12ec046df9c20c7d5173fc2eed6199fd3dbb9a"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-ddk9i788/index",
+     "private_sha256": "cd6b99386af11ec58d1913883e12ec046df9c20c7d5173fc2eed6199fd3dbb9a"
+    },
+    {
+     "args": [
+      "status",
+      "--porcelain"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215349,
+       269,
+       1792759725457193495,
+       1792759725457460288
+      ],
+      "sha256": "cd6b99386af11ec58d1913883e12ec046df9c20c7d5173fc2eed6199fd3dbb9a"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215349,
+       269,
+       1792759725457193495,
+       1792759725457460288
+      ],
+      "sha256": "cd6b99386af11ec58d1913883e12ec046df9c20c7d5173fc2eed6199fd3dbb9a"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-exact/private-index-ddk9i788/index",
+     "private_sha256": "cd6b99386af11ec58d1913883e12ec046df9c20c7d5173fc2eed6199fd3dbb9a"
+    }
+   ],
+   "index_before": {
+    "stat": [
+     16777230,
+     228215349,
+     269,
+     1792759725457193495,
+     1792759725457460288
+    ],
+    "sha256": "cd6b99386af11ec58d1913883e12ec046df9c20c7d5173fc2eed6199fd3dbb9a"
+   },
+   "head": "8e18d732fb1e794a8eb903aaa6e8f941df8a609e",
+   "diff_sha256": "ec984a080e64bfde11c94cc48a8e2bc762cbe19511fd990f376fedab14e7281c",
+   "status": [
+    " M src/local_motion_guard.h",
+    " M src/motioncorr_runner.cpp"
+   ],
+   "runner_sha256": "bd2b5e3189e5dcc49b76f2df04cc2da8ad1c65f1db28cd9bb6da0b9ba0f91f7f",
+   "helper_sha256": "e2d0376dc96ac16438b95e39bae902c8c515854696447b604f3f57c3958bb7c2",
+   "index_after": {
+    "stat": [
+     16777230,
+     228215349,
+     269,
+     1792759725457193495,
+     1792759725457460288
+    ],
+    "sha256": "cd6b99386af11ec58d1913883e12ec046df9c20c7d5173fc2eed6199fd3dbb9a"
+   },
+   "index_unchanged": true
+  }
+ },
+ "binaries": {
+  "ov-base-cpu": {
+   "live": {
+    "size": 8,
+    "sha256": "fd10b7519732cd1744b10cad3aa3fada34ad609cbcbf8b7d74e10eeff6b143cc"
+   },
+   "receipt": "fd10b7519732cd1744b10cad3aa3fada34ad609cbcbf8b7d74e10eeff6b143cc",
+   "expect": "fd10b7519732cd1744b10cad3aa3fada34ad609cbcbf8b7d74e10eeff6b143cc"
+  },
+  "ov-cand-cpu": {
+   "live": {
+    "size": 8,
+    "sha256": "c7bf8292765bc5cffaa751e5ce5a2ddc25ec68cf80f494f38dbbbbe37244fdfc"
+   },
+   "receipt": "c7bf8292765bc5cffaa751e5ce5a2ddc25ec68cf80f494f38dbbbbe37244fdfc",
+   "expect": "c7bf8292765bc5cffaa751e5ce5a2ddc25ec68cf80f494f38dbbbbe37244fdfc"
+  },
+  "ov-mut-cpu": {
+   "live": {
+    "size": 7,
+    "sha256": "2ca0c269967f36ab087391b2aabd8f1760cbf7a00cf41607eb1944baa468713c"
+   },
+   "receipt": "2ca0c269967f36ab087391b2aabd8f1760cbf7a00cf41607eb1944baa468713c",
+   "expect": "2ca0c269967f36ab087391b2aabd8f1760cbf7a00cf41607eb1944baa468713c"
+  }
+ },
+ "processes": {
+  "referring_to_scratch": [],
+  "unreadable": 0
+ },
+ "verdict": "PASS"
+}

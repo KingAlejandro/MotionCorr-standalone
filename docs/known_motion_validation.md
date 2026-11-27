@@ -1,5 +1,11 @@
 # Known-Motion Truth and Applied Displacement-Field Validation
 
+**2026-10-21 truth qualification:** the historical local generator uses a negated
+spatial field as an inverse map, which is only exact for translations. Historical
+fixtures/results below are preserved. The additive [v2 diagnostics](motion_diagnostics_v2.md)
+define analytic forward/inverse maps and test local closure; historical local
+residuals cannot all be attributed to the estimator.
+
 ## Stabilization of the verdict (Issue #66)
 
 The historical measurements below have not been rerun with this strengthened validator.

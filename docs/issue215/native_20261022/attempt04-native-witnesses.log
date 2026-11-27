@@ -1,0 +1,24 @@
+host-original:
+host-replacement:
+fixed-healthy:
+[tiffidentity] converted frames=[0,2) frame-pixels=3840 sum-pixels=1920 exact=1
+fixed-later-grow:
+[tiffidentity] converted frames=[0,2) frame-pixels=3840 sum-pixels=1920 exact=1
+[tiffidentity] later-strip-read index=4 converted=2
+[tiffidentity] changed mode=grow point=later-strip-read
+nvCOMP ingestion declined (TIFF file identity changed or unavailable); using the host reader.
+fixed-later-replace:
+[tiffidentity] converted frames=[0,2) frame-pixels=3840 sum-pixels=1920 exact=1
+[tiffidentity] later-strip-read index=4 converted=2
+[tiffidentity] changed mode=replace point=later-strip-read
+nvCOMP ingestion declined (TIFF file identity changed or unavailable); using the host reader.
+mutant-healthy:
+[tiffidentity] converted frames=[0,2) frame-pixels=3840 sum-pixels=1920 exact=1
+mutant-later-grow:
+[tiffidentity] converted frames=[0,2) frame-pixels=3840 sum-pixels=1920 exact=1
+[tiffidentity] later-strip-read index=4 converted=2
+[tiffidentity] changed mode=grow point=later-strip-read
+mutant-later-replace:
+[tiffidentity] converted frames=[0,2) frame-pixels=3840 sum-pixels=1920 exact=1
+[tiffidentity] later-strip-read index=4 converted=2
+[tiffidentity] changed mode=replace point=later-strip-read

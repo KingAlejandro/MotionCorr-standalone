@@ -1,0 +1,21 @@
+Read-only observations during the CUDA+nvCOMP full CTest on 4GPUs,
+2026-10-19 UTC. These are retained from the terminal tool outputs;
+the individual ps commands did not print wall-clock timestamps.
+
+While ProfilingKit had been running for 02:34:
+  lib.provenance.compilers_running(): ['1969298:cc1plus']
+  1965103 02:34 /home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-215/src/tools/profiling/mcprof.py selftest
+
+After test 31 reported its two import-subset TimeoutExpired errors and the
+suite had continued to test 45, ps showed these active compiler processes:
+  PID 1970785 PPID 1970784 ELAPSED 00:08: cc1plus compiling
+    /mnt/clathrin/alex-motioncorr-226/base/src/motioncorr_runner.cpp
+    for cpu_dose_symmetry_base
+  PID 1970790 PPID 1970789 ELAPSED 00:08: cc1plus compiling
+    /mnt/clathrin/alex-motioncorr-226/build-d2-cuda/mutants/motioncorr_runner_logfile_always_eps.cpp
+  PID 1970804 PPID 1970803 ELAPSED 00:08: cc1plus compiling
+    /mnt/clathrin/alex-motioncorr-226/build-d2-cuda/mutants/motioncorr_runner_logfile_late_guard.cpp
+
+No compiler process was stopped or modified. The source/test-harness defect
+is tracked independently as #246. The complete exception traces are in
+ctest-nvcomp.log. occupancy.log records subsequent timestamped observations.

@@ -253,6 +253,33 @@ Per-family GPU and CPU timing tables are in `docs/workload_corpus/{cpu,gpu}/`; d
 
 Maintainer review of this report, the scope decision and the tag are separate steps (`RELEASE_CHECKLIST.md` §10). Frozen source SHA F: `6d68e2d6`. Tag target T (named by the maintainer; F or a later docs-only evidence commit): pending. `git diff F T -- . ':!docs/rc0' ':!docs/release'` empty: pending. Maintainer sign-off: pending (QF on F is recorded in `docs/rc0/qf/run_6d68e2d6/`).
 
+
+## 8. Post-RC0 defect-fix re-entry
+
+**#215 — TIFF identity before nvCOMP submission.** PR code/test head at validation:
+`76fa8112b829d4e3e9d95f7f869513da5e64b39d` (base `c8844894`; the following
+commit only records documentation/evidence). CUDA-source re-entry:
+CPU full CTest **74/74** on cpu64; CUDA full CTest **108/108** on 4GPUs;
+CUDA+nvCOMP full CTest **111/112** on 4GPUs. Its sole failure is `ProfilingKit`'s
+two import-subset `TimeoutExpired` errors, attributed by the parent to independent
+[#246](https://github.com/KingAlejandro/MotionCorr-standalone/issues/246) with
+compiler occupancy retained; every other test, including `CudaNvcompTiffIdentity`,
+passed. Earlier CPU full runs at both venues were 73/74 with the same #246 failure;
+they remain in the record. No test deadline, gate or tolerance changed.
+
+Six append/atomic-rename controls observed their mutations: all pass with the
+fix and all fail the identity/fallback predicate with only the production CUDA
+file restored from `c8844894`. Native nvCOMP re-entry on one UUID-selected A100
+(GPU3, eight-CPU cap, per-GPU lock): two distinct real tutorial TIFFs, G and L,
+keep their auto `nvcomp` route and have MRC/STAR products identical to both the
+unfixed auto and fixed compact arms. D1's complete, immutable, trusted-input
+precondition is unchanged; §8 of `SUPPORT.md` records the residual race boundary.
+[Commands, revisions, hashes, route logs, failed controls and results](../issue215/README.md).
+
+Not rerun on this candidate: the full QF campaign, the other corpus families,
+multi-GPU publication/scaling, performance gates, SCARF or Tier D science.
+Those rows retain their earlier SHA and are **not retested** here. No new tag or
+maintainer sign-off is implied by this re-entry record.
 ## Post-RC0 #246: fake CLI compiler-settle timeout
 
 PR implementation head `927e5b5cfa51cf72187f182ecffd0693111c71f7`, base `c8844894` (following commit is evidence/docs only).
